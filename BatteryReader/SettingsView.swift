@@ -2,30 +2,6 @@ import SwiftUI
 import AppKit
 
 
-
-extension Color {
-    func colorToData() -> Data? {
-        let nsColor = NSColor(self)
-        return try? NSKeyedArchiver
-            .archivedData(
-                withRootObject: nsColor,
-                requiringSecureCoding: false
-            )
-    }
-    
-    static func dataToColor(from data: Data) -> Color? {
-        if let nsData = try? NSKeyedUnarchiver
-            .unarchivedObject(
-                ofClass: NSColor.self,
-                from: data
-            ) {
-            return Color(nsColor: nsData)
-        }
-        return nil
-    }
-}
-
-
 struct SettingsView: View {
     @AppStorage("showPreview") private var showPreview = true
     @AppStorage("fontSize") private var fontSize = 14.0
@@ -33,74 +9,105 @@ struct SettingsView: View {
     
     @State private var colorPickerColor: Color = .blue
     @State private var darkMode = true
-    @State private var menuBarBattery = false
+    @State private var menuBarBattery = true
+    
+    
+    private func createGridRowToggle(_ title: String, isOn: Binding<Bool>) -> some
+    View {
+        GridRow {
+            Text(title)
+            Toggle("", isOn: isOn)
+                .gridRowGlassEffect()
+        }
+    }
+    private func createColorPicker(_ title: String, selection: Binding<Color>) -> some View {
+        GridRow {
+            Text(title)
+            HStack {
+                ColorPicker("", selection: selection)
+                    .labelsHidden()
+            }
+        }
+    }
+
+    
+    private var GeneralTabView: some View {
+        VStack {
+            GroupBox {
+                Grid(alignment: .trailing, horizontalSpacing: 9, verticalSpacing: 15) {
+                    
+                    GridRow {
+                        Text("Appearance")
+                        
+                        Picker("", selection: $darkMode) {
+                            Text("System").tag(true)
+                            Text("Dark")
+                            Text("Light")
+                        }
+                        .labelsHidden()
+                    }
+                    
+                    
+                    GridRow {
+                        Text("Menubar Format")
+                        
+                        Picker("", selection: $darkMode) {
+                            Text("Default").tag(true)
+                            Text("Compact")
+                        }
+                        .labelsHidden()
+                    }
+                    
+                    
+                    
+                    
+                    createGridRowToggle("Show in Menubar", isOn: $menuBarBattery)
+                }
+                .gridStyle()
+            }
+            
+            HStack {
+                Button("Quit App") { NSApp.terminate(nil) }
+                    .buttonGlassEffect()
+            }
+            .padding()
+        }
+    }
+    
+    
+    private var CustomizeTabView: some View {
+        VStack {
+            GroupBox {
+                Grid(alignment: .trailing, horizontalSpacing: 9, verticalSpacing: 15) {
+                    createColorPicker("Accent Color:", selection: $colorPickerColor)
+                }
+                .gridStyle()
+            }
+            
+            HStack {
+                Button("Apply") {
+                    if let data = colorPickerColor.colorToData() {
+                        selectedColorData = data
+                    }
+                }
+                .buttonGlassEffect()
+                
+                Button("Reset") {
+                    if let data = colorPickerColor.colorToData() {
+                        selectedColorData = data
+                    }
+                }
+                .buttonGlassEffect()
+            }
+            .padding()
+        }
+    }
 
 
-  
     var body: some View {
         TabView {
-        
-            Tab("general", systemImage: "gear") {
-                GroupBox {
-                    Text("settings")
-                        .padding(.horizontal, 25)
-                        .padding(.vertical, 5)
-                        .font(.system(size: 16, weight: .bold))
-                    
-                    Grid(alignment: .trailing, horizontalSpacing: 9, verticalSpacing: 15) {
-                        GridRow {
-                            Text("Toggle dark mode")
-                            Toggle("", isOn: $darkMode).labelsHidden()
-                        }
-                        GridRow {
-                            Text("Show percentage")
-                            Toggle("", isOn: $menuBarBattery).labelsHidden()
-                        }
-                    }
-                    .padding()
-                    .toggleStyle(.switch)
-                }
-                
-                HStack {
-                    Button("Quit App") { NSApp.terminate(nil) }
-                        .clipShape(RoundedRectangle(cornerRadius: 10))
-                }
-                .padding()
-            }
-
-            
-            
-            Tab("customize", systemImage: "pencil") {
-            
-                GroupBox {
-                    Text("customize")
-                        .padding(EdgeInsets(top: 5, leading: 25, bottom:  5, trailing: 25))
-                        .font(.system(size: 16, weight: .bold))
-                    
-                    Grid(
-                        alignment: .trailing,
-                        horizontalSpacing: 9,
-                        verticalSpacing: 15
-                    ) {
-                        GridRow {
-                            Text("Accent Color")
-                            HStack {
-                                ColorPicker("", selection: $colorPickerColor)
-                                    .labelsHidden()
-                            }
-                        }
-                    }
-                    .padding()
-                    .toggleStyle(.switch)
-                    
-                    Button("Apply") {
-                        if let data = colorPickerColor.colorToData() {
-                            selectedColorData = data
-                        }
-                    }
-                    .padding()
-                }
-            }
+            Tab("general", systemImage: "gear") { GeneralTabView }
+            Tab("customize", systemImage: "pencil") { CustomizeTabView }
         }
         .frame(width: 300, height: 300)
         .onAppear() {
@@ -108,10 +115,7 @@ struct SettingsView: View {
                 colorPickerColor = color
             }
         }
- 
     }
-    
- 
 }
 
 #Preview { SettingsView() }

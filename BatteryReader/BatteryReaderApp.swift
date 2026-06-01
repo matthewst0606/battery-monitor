@@ -4,19 +4,20 @@ import AppKit
 @main
 struct BatteryReaderApp: App {
     @StateObject private var monitor = BatteryMonitor()
-    
-    
+
     @AppStorage("selectedColor") private var selectedColorData: Data = Data()
     @State private var selectedAccentColor: Color = .accentColor
     
   
     var body: some Scene {
+        MenuBarExtra {
+            ContentView()
+                .background(.clear.opacity(0.2))
+                .padding(17)
+        }
 
-        MenuBarExtra { ContentView() }
         label: {
-            ZStack {
-
-                
+            HStack {
                 Image(systemName: monitor.batteryIcon)
                     .font(.system(size: 16, weight: .medium))
                     .symbolRenderingMode(.palette)
@@ -24,20 +25,21 @@ struct BatteryReaderApp: App {
                         Color.dataToColor(from: selectedColorData) ?? selectedAccentColor,
                         Color.primary
                     )
-
-                Text("\(monitor.calculateTimeRemaining())")
-                    .font(.system(size: 12, weight: .thin,))
+                Text("\(monitor.calculateTimeRemainingCompact())")
+                    .font(.system(size: 10, weight: .thin,))
                     .foregroundStyle(.white)
-                    .padding()
             }
         }
         .menuBarExtraStyle(.window)
         .windowStyle(.hiddenTitleBar)
-      
-      
+        
       
         #if os(macOS)
-        Settings { SettingsView() }
+        Settings {
+            SettingsView()
+                .background(.clear.opacity(0.2))
+
+        }
         #endif
 
     }
