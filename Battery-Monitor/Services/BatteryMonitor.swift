@@ -16,27 +16,29 @@ class BatteryMonitor: ObservableObject {
     @Published var timeToFullBattery: Double = 0.0
     @Published var isCharging: Bool = false
     @Published var batteryHealth: Int = 0
+    private var updateTimer: AnyCancellable?
 
-
-  
+    
     init() {
         update()
-        Timer.scheduledTimer(withTimeInterval: 1, repeats: true)
-            { _ in self.update() }
+
+        updateTimer = Timer.publish(every: 10, on: .main, in: .common)
+            .autoconnect()
+            .sink { [weak self] _ in self?.update()
+            }
     }
   
     var batteryIcon: String {
-        if isCharging { return "battery.100.bolt" }
 
         switch batteryLevel {
-          case 0..<25:  return "battery.0"
-          case 25..<50: return "battery.25"
-          case 50..<75: return "battery.50"
-          case 75..<100: return "battery.75"
-          default:      return "battery.100"
+          case 0..<25:   return "battery.0percent"
+          case 25..<50:  return "battery.25percent"
+          case 50..<75:  return "battery.50percent"
+          case 75..<100: return "battery.75percent"
+          default:       return "battery.100percent"
         }
     }
-
+    
     func update(){
         let snapshot = IOPSCopyPowerSourcesInfo()
           .takeRetainedValue()
@@ -68,6 +70,7 @@ class BatteryMonitor: ObservableObject {
     }
     
 // ------------------------------------------------------------------------------
+
     // format: N hours:N minutes
     func calculateTimeRemaining() -> String {
         let hours = Int(timeRemaining/60)
@@ -78,6 +81,7 @@ class BatteryMonitor: ObservableObject {
         let remain = "\(hours):\(minutes < 10 ? "0\(minutes)" : "\(minutes)")"
         return remain;
     }
+    
     
     // format: N hours N minutes
     func calculateTimeRemainingFull() -> String {
@@ -94,7 +98,9 @@ class BatteryMonitor: ObservableObject {
         let remain = "\(hours) hours"
         return remain;
     }
+    
 // ------------------------------------------------------------------------------
+    
     func calculateTimeToFullBattery() -> String {
         let hours = Int(timeToFullBattery/60)
         let minutes = Int(timeToFullBattery.truncatingRemainder(dividingBy: 60))
@@ -102,4 +108,7 @@ class BatteryMonitor: ObservableObject {
         let remain = "\(hours):\(minutes < 10 ? "0\(minutes)" : "\(minutes)")"
         return remain;
     }
+  
+
+
 }

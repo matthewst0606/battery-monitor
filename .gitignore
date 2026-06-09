@@ -3,6 +3,5 @@
 .DS_Store
 .vscode/
 .build/
-app.xcodeproj/
+Battery-Monitor.xcodeproj/
 
-app-Info.plist

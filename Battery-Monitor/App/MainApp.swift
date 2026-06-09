@@ -1,21 +1,22 @@
 import SwiftUI
 import AppKit
 
-@main
-struct BatteryReaderApp: App {
-    @StateObject private var monitor = BatteryMonitor()
 
+@main
+struct MainApp: App {
+    @StateObject private var monitor = BatteryMonitor()
+    @StateObject private var modelRunner = PythonModelRunner()
     @AppStorage("selectedColor") private var selectedColorData: Data = Data()
     @State private var selectedAccentColor: Color = .accentColor
     
-  
+    
     var body: some Scene {
         MenuBarExtra {
-            ContentView()
+            MenuBarView()
                 .background(.clear.opacity(0.2))
                 .padding(17)
         }
-
+        
         label: {
             HStack {
                 Image(systemName: monitor.batteryIcon)
@@ -25,9 +26,11 @@ struct BatteryReaderApp: App {
                         Color.dataToColor(from: selectedColorData) ?? selectedAccentColor,
                         Color.primary
                     )
-                Text("\(monitor.calculateTimeRemainingCompact())")
-                    .font(.system(size: 10, weight: .thin,))
-                    .foregroundStyle(.white)
+              
+                    Text("\(monitor.calculateTimeRemainingCompact())")
+                        .font(.system(size: 10, weight: .thin,))
+                        .foregroundStyle(.white)
+                
             }
         }
         .menuBarExtraStyle(.window)
@@ -38,7 +41,6 @@ struct BatteryReaderApp: App {
         Settings {
             SettingsView()
                 .background(.clear.opacity(0.2))
-
         }
         #endif
 

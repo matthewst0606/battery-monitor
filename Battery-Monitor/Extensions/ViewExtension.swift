@@ -6,10 +6,10 @@
 //
 
 import SwiftUI
+import 
 
 
 extension View {
-    
     func widgetText() -> some View {
         self
             .font(.system(size: 12, weight: .bold))
@@ -18,22 +18,16 @@ extension View {
     }
     
     func gridRowGlassEffect() -> some View {
-        self
-            .labelsHidden()
-            .glassEffect(.clear)
+        self.labelsHidden().glassEffect(.clear)
     }
+    
     func buttonGlassEffect() -> some View {
-        self
-            .padding(8)
-            .buttonStyle(.plain)
-            .glassEffect(.clear)
+        self.padding(8).buttonStyle(.plain).glassEffect(.clear)
     }
 }
 
 extension Grid {
     func gridStyle() -> some View {
-        self
-            .padding()
-            .toggleStyle(.switch)
+        self.padding().toggleStyle(.switch)
     }
 }
