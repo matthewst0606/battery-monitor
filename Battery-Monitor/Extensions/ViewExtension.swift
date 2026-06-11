@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import 
 
 
 extension View {
@@ -17,17 +16,13 @@ extension View {
             .padding(EdgeInsets(top: 5, leading: 5, bottom:  2, trailing: 5))
     }
     
-    func gridRowGlassEffect() -> some View {
-        self.labelsHidden().glassEffect(.clear)
-    }
-    
-    func buttonGlassEffect() -> some View {
-        self.padding(8).buttonStyle(.plain).glassEffect(.clear)
-    }
+    func getGlassEffect() -> some View
+        { self.glassEffect(.clear) }
+    func buttonGlassEffect() -> some View
+        { self.padding(8).buttonStyle(.plain).glassEffect(.clear) }
 }
 
-extension Grid {
-    func gridStyle() -> some View {
-        self.padding().toggleStyle(.switch)
-    }
+extension Toggle {
+    func getToggleStyle() -> some View
+        { self.padding().toggleStyle(.switch) }
 }

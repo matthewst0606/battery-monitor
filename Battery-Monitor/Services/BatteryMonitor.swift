@@ -8,7 +8,10 @@
 import Foundation
 import Combine
 import IOKit.ps
+import IOKit.graphics
 import SwiftUI
+import AppKit
+
 
 class BatteryMonitor: ObservableObject {
     @Published var batteryLevel: Float = 0.0
@@ -18,32 +21,26 @@ class BatteryMonitor: ObservableObject {
     @Published var batteryHealth: Int = 0
     private var updateTimer: AnyCancellable?
 
-    
     init() {
         update()
-
         updateTimer = Timer.publish(every: 10, on: .main, in: .common)
             .autoconnect()
-            .sink { [weak self] _ in self?.update()
-            }
+            .sink { [weak self] _ in self?.update() }
     }
   
     var batteryIcon: String {
-
         switch batteryLevel {
-          case 0..<25:   return "battery.0percent"
-          case 25..<50:  return "battery.25percent"
-          case 50..<75:  return "battery.50percent"
-          case 75..<100: return "battery.75percent"
-          default:       return "battery.100percent"
+            case 0..<25:   return "battery.0percent"
+            case 25..<50:  return "battery.25percent"
+            case 50..<75:  return "battery.50percent"
+            case 75..<100: return "battery.75percent"
+            default:       return "battery.100percent"
         }
     }
     
     func update(){
-        let snapshot = IOPSCopyPowerSourcesInfo()
-          .takeRetainedValue()
-        let sources = IOPSCopyPowerSourcesList(snapshot)
-          .takeRetainedValue() as Array
+        let snapshot = IOPSCopyPowerSourcesInfo().takeRetainedValue()
+        let sources = IOPSCopyPowerSourcesList(snapshot).takeRetainedValue() as Array
       
         for source in sources {
             let info = IOPSGetPowerSourceDescription(snapshot, source)
@@ -66,8 +63,16 @@ class BatteryMonitor: ObservableObject {
             
             if let health = info[kIOPSMaxCapacityKey] as? Int
                 { batteryHealth = health }
+            
+
         }
+        
     }
+    
+
+    
+    
+    
     
 // ------------------------------------------------------------------------------
 
@@ -108,7 +113,4 @@ class BatteryMonitor: ObservableObject {
         let remain = "\(hours):\(minutes < 10 ? "0\(minutes)" : "\(minutes)")"
         return remain;
     }
-  
-
-
 }

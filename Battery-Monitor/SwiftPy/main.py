@@ -34,8 +34,6 @@ from battery_model import BatteryModel
 data = GetBatteryData()
 system_info = data.system_info
 battery_info = data.battery_dict
-
-
 if battery_info == None:
     print("Error occured: battery_info is missing...")
     sys.exit()

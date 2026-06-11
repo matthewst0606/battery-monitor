@@ -11,12 +11,14 @@
 import SwiftUI
 import IOKit.ps
 
-
 struct MenuBarView: View {
     @StateObject private var monitor = BatteryMonitor()
     @AppStorage("selectedColor") private var selectedColorData: Data = Data()
     @State private var selectedAccentColor: Color = .accentColor
     @State private var pythonOutput = ""
+    
+    @Environment(\.openWindow) private var openWindow
+    @Environment(\.openSettings) private var openSettings
     
     private var batteryIconView: some View {
         ZStack {
@@ -28,15 +30,11 @@ struct MenuBarView: View {
                     Color.dataToColor(from: selectedColorData) ?? selectedAccentColor,
                     Color.primary
                 )
-
             Text("\(Int(monitor.batteryLevel))%")
                 .offset(x: -1.5)
                 .font(.system(size: 12, weight: .bold))
                 .foregroundStyle(.white)
                 .minimumScaleFactor(0.5)
-
-            Text(pythonOutput)
-            
         }
     }
     
@@ -56,23 +54,34 @@ struct MenuBarView: View {
     }
     
     var body: some View {
-        VStack(alignment: .center, spacing: 15) {
+        VStack(alignment: .center, spacing: 12) {
             // run batteryIconView to display icon with battery level
             batteryIconView
-            
+
             // display time remaining and battery health
             GroupBox {
-                Text("Time Remaining: \(timeRemainingText)")
-                    .widgetText()
-                Text("Battery Health: \(monitor.batteryHealth)")
-                    .widgetText()
+                Text("Time Remaining: \(timeRemainingText)").widgetText()
+                Text("Battery Health: \(monitor.batteryHealth)").widgetText()
+            }
+            
+            HStack {
+                Button { openWindow(id: "main") }
+                label: {
+                    Image(systemName: "macwindow")
+                }
+                
+                Button { openSettings() }
+                label: {
+                    Image(systemName: "gearshape.fill")
+                }
             }
         }
-        .padding()
-        .onAppear {
-            monitor.update()
-        }
+        .padding(EdgeInsets(top: 0, leading: 5, bottom: 10, trailing: 5))
+        .frame(width: 200, height: 175)
+        .onAppear { monitor.update() }
     }
 }
 
-#Preview { MenuBarView() }
+#Preview {
+    MenuBarView()
+}

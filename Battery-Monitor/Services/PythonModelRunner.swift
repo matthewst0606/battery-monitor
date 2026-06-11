@@ -44,8 +44,7 @@ class PythonModelRunner: ObservableObject {
         catch {
             print("Failed to run Python:", error)
         }
-        
-        
+    
         let output = String(
             data: outputPipe.fileHandleForReading.readDataToEndOfFile(),
             encoding: .utf8
