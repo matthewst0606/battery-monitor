@@ -10,15 +10,17 @@ import SwiftUI
 
 struct GpuTabView: View {
     @StateObject private var monitor = BatteryMonitor()
-    @StateObject private var modelRunner = PythonModelRunner()
-    
+    @EnvironmentObject var modelRunner: PythonModelRunner
+
     var body: some View {
         VStack(alignment: .leading, spacing: 5) {
-            Text("GPU Usage: \(Int())%")
-            Text("GPU Frequency: \(Int()) MHz")
-            Text("GPU Residency: \(Int())%")
-            Text("GPU Idle: \(Int())%")
-            Text("GPU Power: \(Int())")
+            GroupBox {
+                Text("GPU Usage: \(modelRunner.GpuUsage, specifier: "%.2f")%").widgetText()
+                Text("GPU Idle: \(modelRunner.GpuIdle, specifier: "%.2f")%").widgetText()
+                Text("GPU Power: \(Int(modelRunner.GpuPower)) W").widgetText()
+                Text("GPU Frequency: \(Int(modelRunner.GpuFrequency)) MHz").widgetText()
+                Text("GPU Residency: \(modelRunner.GpuResidency, specifier: "%.2f")%").widgetText()
+            }
         }
     }
 }

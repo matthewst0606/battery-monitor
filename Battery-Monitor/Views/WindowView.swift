@@ -14,11 +14,12 @@ struct WindowView: View {
     @State private var pythonOutput = ""
 
 
+
     @ViewBuilder private var BatteryView: some View {BatteryTabView()}
     @ViewBuilder private var CPUView: some View {CpuTabView()}
     @ViewBuilder private var GPUView: some View {GpuTabView()}
-    @ViewBuilder private var MemoryView: some View {CpuTabView()}
-    @ViewBuilder private var ProcessesView: some View {CpuTabView()}
+    @ViewBuilder private var MemoryView: some View {MemoryTabView()}
+    @ViewBuilder private var ProcessesView: some View {ProcessesTabView()}
 
 
     var ModelView: some View {
@@ -37,21 +38,27 @@ struct WindowView: View {
             TabView() {
                 Tab("Stats", systemImage: "macbook.gen2") {
                     TabView {
-                        Tab("Battery", systemImage: "bolt.fill") { BatteryView }
-                        Tab("CPU", systemImage: "") { CPUView }
-                        Tab("GPU", systemImage: "") { GPUView }
-                        Tab("Memory", systemImage: "") { MemoryView }
-                        Tab("Processes", systemImage: "") { ProcessesView }
+                        Tab("Battery", systemImage: "") { BatteryView.environmentObject(modelRunner) }
+                        Tab("CPU", systemImage: "") { CPUView.environmentObject(modelRunner) }
+                        Tab("GPU", systemImage: "") { GPUView.environmentObject(modelRunner) }
+                        Tab("Memory", systemImage: "") { MemoryView.environmentObject(modelRunner) }
+                        Tab("Processes", systemImage: "") { ProcessesView.environmentObject(modelRunner) }
                     }
                     .tabViewStyle(.automatic)
                 }
                 
                 Tab("Usage", systemImage: "bolt.fill") {
-                    
+                    TabView {
+                        Tab("Model Predictions", systemImage: " ") {
+                            Text("Estimated Battery Left: ")
+                            Text("Battery Loss per Hour: ")
+                        }
+                    }.tabViewStyle(.automatic)
+
                     
                 }
                 
-                Tab("Model", systemImage: "arrow.trianglehead.2.clockwise.rotate.90.circle.fill") {
+                Tab("Model Logs", systemImage: "arrow.trianglehead.2.clockwise.rotate.90.circle.fill") {
                     VStack {
                         GroupBox {
                             ScrollView {

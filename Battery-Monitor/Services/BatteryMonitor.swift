@@ -11,6 +11,8 @@ import IOKit.ps
 import IOKit.graphics
 import SwiftUI
 import AppKit
+import Darwin
+import MachO
 
 
 class BatteryMonitor: ObservableObject {
@@ -23,7 +25,7 @@ class BatteryMonitor: ObservableObject {
 
     init() {
         update()
-        updateTimer = Timer.publish(every: 10, on: .main, in: .common)
+        updateTimer = Timer.publish(every: 20, on: .main, in: .common)
             .autoconnect()
             .sink { [weak self] _ in self?.update() }
     }
@@ -41,6 +43,7 @@ class BatteryMonitor: ObservableObject {
     func update(){
         let snapshot = IOPSCopyPowerSourcesInfo().takeRetainedValue()
         let sources = IOPSCopyPowerSourcesList(snapshot).takeRetainedValue() as Array
+    
       
         for source in sources {
             let info = IOPSGetPowerSourceDescription(snapshot, source)
@@ -63,6 +66,7 @@ class BatteryMonitor: ObservableObject {
             
             if let health = info[kIOPSMaxCapacityKey] as? Int
                 { batteryHealth = health }
+            
             
 
         }

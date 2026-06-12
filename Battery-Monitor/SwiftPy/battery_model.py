@@ -3,8 +3,6 @@ import torch
 import torch.optim as optim
 import torch.nn as nn
 
-print("battery_model.py started")
-
 class BatteryModel:
     # --- initialize a sequential model & optimizer ---
     def __init__(self, device):
@@ -38,8 +36,6 @@ class BatteryModel:
 
             loss.backward()
             self.optimizer.step()
-#            if epoch % 100 == 0: 
-#                print(f"Epoch {epoch}: {loss.item():.4f}")
 
 
 
@@ -63,15 +59,20 @@ class BatteryModel:
             predicted_y = y_scaler.inverse_transform(predicted)
 
 
-        torch.save(
-            self.model.state_dict(),
-            "battery_model.pt"
-        )
-
+        torch.save(self.model.state_dict(), "battery_model.pt")
         return actual_y, predicted_y, val_loss
     
 
     
+    
+#    
+#    # --- printing model results ---
+#    def print_results(self)
+#        print('\n')
+#        for guess, actual in zip(predicted_y[:10], actual_y[:10]):
+#            print(f"Predicted: {int(guess.item())} | Actual: {int(actual.item())}")
+#
+#        print(f"Validation Loss: {val_loss.item():.4f}%")
 
 
 

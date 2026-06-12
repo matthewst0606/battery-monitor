@@ -7,15 +7,16 @@
 
 import SwiftUI
 
-
 struct MemoryTabView: View {
     @StateObject private var monitor = BatteryMonitor()
-    @StateObject private var modelRunner = PythonModelRunner()
-    
+    @EnvironmentObject var modelRunner: PythonModelRunner
+
     var body: some View {
         VStack(alignment: .leading, spacing: 5) {
-            Text("Total Memory: \(Int())")
-            Text("Used Memory: \(Int())")
+            GroupBox {
+                Text("Total Memory: \(modelRunner.totalMemory, specifier: "%.2f") GB").widgetText()
+                Text("Used Memory: \(modelRunner.usedMemory, specifier: "%.2f") GB").widgetText()
+            }
         }
     }
 }

@@ -25,8 +25,8 @@ struct MainApp: App {
     var body: some Scene {
         WindowGroup("Battery Monitor", id: "main") {
             WindowView()
-                .preferredColorScheme(colorScheme)
                 .background(.clear.opacity(0.2))
+                .preferredColorScheme(colorScheme)
         }
         
         
@@ -62,7 +62,7 @@ struct MainApp: App {
             SettingsView()
                 .background(.clear.opacity(0.2))
                 .preferredColorScheme(colorScheme)
-                .frame(minWidth: 300, minHeight: 200)
+                .frame(minWidth: 500, minHeight: 500)
         }
         .windowResizability(.automatic)
         #endif

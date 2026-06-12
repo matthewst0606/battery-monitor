@@ -9,14 +9,20 @@ import SwiftUI
 
 struct BatteryTabView: View {
     @StateObject private var monitor = BatteryMonitor()
-    @StateObject private var modelRunner = PythonModelRunner()
-    
+    @EnvironmentObject var modelRunner: PythonModelRunner
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 5) {
-            Text("Current Charge: \(Int(monitor.batteryLevel))%")
-            Text("Battery Health: \(Int(monitor.batteryHealth))")
-            Text("Cycle Count: \(Int())")
-            Text("Current Battery Prediction: \(Int())")
-        }
+            VStack(alignment: .leading, spacing: 5) {
+                Text("Current Charge: \(Int(monitor.batteryLevel))%").widgetText()
+                Text("Battery Health: \(monitor.batteryHealth)").widgetText()
+                Text("Cycle Count: \(modelRunner.cycleCount)").widgetText()
+                Text("Current Battery Prediction: \(Int(modelRunner.timeRemaining))").widgetText()
+            }
+            .padding()
+            .frame(width: 260, height: 160, alignment: .topLeading)
+            .background(.quinary)
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+        
     }
+
 }

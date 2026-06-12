@@ -68,12 +68,25 @@ struct MenuBarView: View {
                 Button { openWindow(id: "main") }
                 label: {
                     Image(systemName: "macwindow")
+                        .font(.system(size: 20, weight: .bold))
+                        .foregroundStyle(Color.primary, Color.dataToColor(from: selectedColorData) ?? selectedAccentColor)
                 }
+                .frame(width: 25, height: 15)
+                .buttonGlassEffect()
+
                 
                 Button { openSettings() }
                 label: {
                     Image(systemName: "gearshape.fill")
+                    
+                        .font(.system(size: 20, weight: .bold))
+                        .foregroundStyle(Color.dataToColor(from: selectedColorData) ?? selectedAccentColor)
+
+                    
                 }
+                .frame(width: 25, height: 15)
+                .buttonGlassEffect()
+
             }
         }
         .padding(EdgeInsets(top: 0, leading: 5, bottom: 10, trailing: 5))

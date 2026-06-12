@@ -19,7 +19,7 @@ extension View {
     func getGlassEffect() -> some View
         { self.glassEffect(.clear) }
     func buttonGlassEffect() -> some View
-        { self.padding(8).buttonStyle(.plain).glassEffect(.clear) }
+        { self.padding(8).buttonStyle(.plain).glassEffect() }
 }
 
 extension Toggle {

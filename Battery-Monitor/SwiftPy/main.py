@@ -2,6 +2,7 @@ import sys
 import numpy as np
 import torch
 import joblib
+import json
 from sklearn.preprocessing import StandardScaler
 from battery_data import GetBatteryData
 from encoder import encode
@@ -9,26 +10,12 @@ from csv_logger import insert_row, process_row, gpu_row, cpu_row
 
 from battery_model import BatteryModel
 
-
-# more potential commands to use
-#-------------------------------
-# top -o cpu
-# sudo powermetrics --samplers tasks --show-process-energy -n 1
-# sudo powermetrics --samplers cpu_power,gpu_power -n 1
-# sudo powermetrics --samplers thermal -n 1
-# sudo powermetrics --samplers cpu_power,gpu_power,thermal,battery,tasks --show-process-energy -n 1
-
-
-# more potential predictions
-#-------------------------------
-# 1. Battery drain rate
-
-
 # more potential features
 #-------------------------------
 # 1. better automatic brightness adjustment based on current system data/usage.
 # e.g. say like a user wants to get n hours out of their battery, the model can adjust
 # brightness levels and other system factors to try and adjust to that request
+# 2. Battery drain rate
 
 
 data = GetBatteryData()
@@ -71,9 +58,14 @@ df = insert_row(
 )
 
 
-# selecting device (M series chip) if available
-if torch.backends.mps.is_available(): device = 'mps'
-else: device = 'cpu'
+## selecting device (M series chip) if available
+#if torch.backends.mps.is_available(): device = 'mps'
+#else: device = 'cpu'
+
+
+#changed to cpu (better for battery)
+# might add user preference later...
+device = 'cpu'
 
 feature_columns = [
     "Battery_Percent",
@@ -147,20 +139,12 @@ y_val = target_data[validation_idx]
 # --------------------------------------------------
 b_model = BatteryModel(device) # initialize the model and optimizer
 print('\n')
-b_model.run_model(x_train, y_train) # running the model
+#b_model.run_model(x_train, y_train) # running the model
 
 # --- evaluate model results on validation data ---
-actual_y, predicted_y, val_loss = b_model.evaluate_model(device, x_val, y_val, y_scaler)
+#actual_y, predicted_y, val_loss = b_model.evaluate_model(device, x_val, y_val, y_scaler)
 
 
-# --- printing model results ---
-print('\n')
-for guess, actual in zip(predicted_y[:10], actual_y[:10]):
-    print(f"Predicted: {int(guess.item())} | Actual: {int(actual.item())}")
-
-print(f"Validation Loss: {val_loss.item():.4f}%")
-
-print(df[feature_columns].iloc[-1].to_dict())
 
 # predict current battery time from the newest row
 current_x = df[feature_columns].iloc[[-1]].values
@@ -185,9 +169,13 @@ with torch.no_grad():
 
 
 
-print(f"Current battery prediction: {int(current_prediction[0][0])}")
-    
-    # time.sleep(1)
 
+features = df[feature_columns].iloc[-1].to_dict()
+prediction = int(current_prediction[0][0])
 
+result = {
+    "features": features,
+    "prediction": prediction
+}
 
+print (json.dumps(result))
