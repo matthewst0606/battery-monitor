@@ -10,6 +10,7 @@ import IOKit.ps
 import SwiftUI
 
 class PythonModelRunner: ObservableObject {
+    
     @Published var modelOutput = ""
     @Published var timeRemaining: Double = 0.0
     @Published var batteryPercent: Int = 0
@@ -35,22 +36,39 @@ class PythonModelRunner: ObservableObject {
     private var pythonTimer: AnyCancellable?
     private var isRunningPython = false
     
+    struct TimeRemaining: Identifiable {
+        let name: String
+        let prediction: Double
+        let timestamp: Date
+        let id = UUID()
+
+        init(name: String, prediction: Double, hour: Int) {
+            self.name = name
+            self.prediction = prediction
+            let calendar = Calendar.autoupdatingCurrent
+            self.timestamp =
+                calendar.date(from: DateComponents(hour: hour))!
+        }
+    }
+    @Published var outputHistory: [TimeRemaining] = []
+    
     init() {
         pythonTimer = Timer.publish(every: 900, on: .main, in: .common)
             .autoconnect()
             .sink { [weak self] _ in
-                guard let self = self, !self.isRunningPython else { return }
+                print("timer fired")
+
+                guard let self = self, !self.isRunningPython else {
+                    print("timer blocked")
+                    return
+                }
                 self.isRunningPython = true
                 
+                
+                
                 DispatchQueue.global(qos: .background).async {
-                    let output = self.getPy()
-                    let out = output.trimmingCharacters(in: .whitespacesAndNewlines)
-                    let value = Double(out) ?? 0
-                    
-                    DispatchQueue.main.async {
-                        self.timeRemaining = value
-                        self.isRunningPython = false
-                    }
+                    _ = self.getPy()
+                    DispatchQueue.main.async { self.isRunningPython = false }
                 }
             }
     }
@@ -80,6 +98,19 @@ class PythonModelRunner: ObservableObject {
            let result = try? JSONDecoder().decode(PythonResult.self, from: data) {
             DispatchQueue.main.async {
                 self.timeRemaining = Double(result.prediction)
+                self.outputHistory.append(
+                    TimeRemaining (
+                        name: "estimatedBattery",
+                        prediction: Double(result.prediction),
+                        hour: Calendar.current.component(.hour, from: Date())
+                    )
+
+                )
+                if self.outputHistory.count > 48 {
+                    self.outputHistory.removeFirst()
+                }
+                self.batteryPercent = Int(result.features["Battery_Percent"] ?? 0)
+                
                 self.batteryPercent = Int(result.features["Battery_Percent"] ?? 0)
                 self.batteryCondition = String(Int(result.features["Battery_Condition"] ?? 0))
                 
@@ -108,7 +139,7 @@ class PythonModelRunner: ObservableObject {
                     Prediction: \(result.prediction)
                     Battery: \(Int(result.features["Battery_Percent"] ?? 0))%
                     CPU Usage: \(result.features["CPU_Usage"] ?? 0)%
-
+                    
                 """
             }
         }
@@ -134,5 +165,15 @@ class PythonModelRunner: ObservableObject {
         process.standardError = errorPipe
         
         return (process, outputPipe, errorPipe)
+    }
+    
+    
+    
+    func updatePy() {
+        self.modelOutput = "Loading..."
+        DispatchQueue.global(qos: .background).async {
+            let result = self.getPy()
+            DispatchQueue.main.async { self.modelOutput = result }
+        }
     }
 }

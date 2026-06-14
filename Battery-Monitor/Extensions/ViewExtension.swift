@@ -12,7 +12,6 @@ extension View {
     func widgetText() -> some View {
         self
             .font(.system(size: 12, weight: .bold))
-            .foregroundStyle(.white)
             .padding(EdgeInsets(top: 5, leading: 5, bottom:  2, trailing: 5))
     }
     

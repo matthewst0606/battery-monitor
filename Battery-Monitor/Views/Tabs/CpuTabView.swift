@@ -9,9 +9,13 @@ import SwiftUI
 
 struct CpuTabView: View {
     @StateObject private var monitor = BatteryMonitor()
+    @StateObject private var cpu = CPUService()
+
     @EnvironmentObject var modelRunner: PythonModelRunner
     
     var body: some View {
+
+        
         VStack(alignment: .leading, spacing: 5) {
             GroupBox {
                 Text("CPU Usage: \(modelRunner.CpuUsage, specifier: "%.2f")%").widgetText()
@@ -20,8 +24,6 @@ struct CpuTabView: View {
                 Text("CPU Frequency: \(Int(modelRunner.CpuFrequency)) MHz").widgetText()
                 Text("CPU Residency: \(modelRunner.CpuResidency, specifier: "%.2f")%").widgetText()
             }
-
-
         }
     }
 }

@@ -21,7 +21,6 @@ class GetBatteryData:
     # ----------------------------------------------------
     def get_system_info(self):
         memory = psutil.virtual_memory()
-
         self.system_info['Processor_Model'] = platform.machine()
         self.system_info[ 'Sys_Date'] = datetime.datetime.now().strftime('%d/%m/%Y')
         self.system_info['Sys_Time'] = datetime.datetime.now().strftime("%H:%M:%S")
@@ -29,20 +28,7 @@ class GetBatteryData:
         self.system_info['Process_Count'] = len(psutil.pids())
         self.system_info['Total_Memory'] = round(memory.total / (1024 ** 3), 2)
         self.system_info['Used_Memory'] = round(memory.used / (1024 ** 3), 2)
-
         return self.system_info
-
-
-    def print_system_info(self):
-        print(f"""
-            Processor: {self.system_info['Processor_Model']}")
-            Date: {self.system_info['Sys_Date']}
-            Time: {self.system_info['Sys_Time']}
-            Processes: {self.system_info['Process_Count']}
-            CPU usage: {self.system_info['CPU_Usage']}%
-            Total Memory: {self.system_info['Total_Memory']} GB
-            Used Memory: {self.system_info['Used_Memory']} GB
-        """)
 
     # gets battery info from the system and add each
     # item to a dictionary
@@ -86,20 +72,6 @@ class GetBatteryData:
             "low_power_mode": low_power_mode,
             "battery_condition": battery_condition,
         }
-
-    def print_battery_info(self):
-        print(f"""
-            Percent Charge: {self.battery_dict['battery_percent']}%
-            Charging: {self.battery_dict['charging_state']}
-            Condition: {self.battery_dict['battery_condition']}
-            Maximum Capacity: {self.battery_dict['maximum_capacity']}
-            Cycle Count: {self.battery_dict['cycle_count']}
-            Low Power Mode: {self.battery_dict['low_power_mode']}
-            Remaining Battery: {self.battery_dict['time_remaining']}\n
-        """)
-
-
-
 
     def get_process_info(self):
         processes = subprocess.getoutput("""

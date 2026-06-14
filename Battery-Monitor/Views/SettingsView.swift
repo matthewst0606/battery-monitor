@@ -35,13 +35,10 @@ struct SettingsView: View {
             Toggle("", isOn: isOn).getGlassEffect()
         }
     }
-    
     private func createColorPicker(_ title: String, selection: Binding<Color>) -> some View {
         GridRow {
             Text(title)
-            HStack {
-                ColorPicker("", selection: selection).labelsHidden()
-            }
+            HStack { ColorPicker("", selection: selection).labelsHidden() }
         }
     }
 
@@ -101,39 +98,17 @@ struct SettingsView: View {
             }.padding()
         }
     }
-    
-    // creates the elements of the customize tab in settings
-    private var ModelTabView: some View {
-        VStack {
-            GroupBox {
-                ScrollView {
-                    Text(pythonOutput)
-                        .widgetText()
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .textSelection(.enabled)
-                }
-            }.padding()
-        }
-    }
-
 
     var body: some View {
         // create the tabs that are displayed
         // at the top of the settings page
         TabView {
-            ModelTabView.tabItem { Image(systemName: "power.circle.fill") }.tag(0)
             GeneralTabView.tabItem { Image(systemName: "gearshape") }.tag(1)
             CustomizeTabView.tabItem { Image(systemName: "square.and.pencil.circle.fill") }.tag(2)
         }
         .onAppear() {
             if let color = Color.dataToColor(from: selectedColorData)
                 { colorPickerColor = color }
-
-            pythonOutput = "Loading..."
-            DispatchQueue.global(qos: .background).async {
-                let result = modelRunner.getPy()
-                DispatchQueue.main.async { pythonOutput = result }
-            }
         }
     }
 }
