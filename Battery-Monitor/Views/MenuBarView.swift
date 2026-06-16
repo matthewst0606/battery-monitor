@@ -12,7 +12,7 @@ import SwiftUI
 import IOKit.ps
 
 struct MenuBarView: View {
-    @StateObject private var monitor = BatteryMonitor()
+    @EnvironmentObject var monitor: BatteryMonitor
     @AppStorage("selectedColor") private var selectedColorData: Data = Data()
     @State private var selectedAccentColor: Color = .accentColor
     @State private var pythonOutput = ""
@@ -30,7 +30,7 @@ struct MenuBarView: View {
                     Color.dataToColor(from: selectedColorData) ?? selectedAccentColor,
                     Color.primary
                 )
-            Text("\(Int(monitor.batteryLevel))%")
+            Text("\(monitor.info?.batteryLevel ?? 0)%")
                 .offset(x: -1.5)
                 .font(.system(size: 12, weight: .bold))
                 .foregroundStyle(.white)
@@ -38,20 +38,7 @@ struct MenuBarView: View {
         }
     }
     
-    // returns a string that displays how long it will take until
-    // battery is dead or fully charged
-    private var timeRemainingText: String {
-        if monitor.isCharging {
-            if monitor.timeToFullBattery == -1.0
-                { return "calculating" }
-            return "Time to Full: \(monitor.timeToFullBattery)"
-        }
-        else {
-            if monitor.calculateTimeRemaining() == "0:0-1"
-                { return "calculating" }
-            return "\(monitor.calculateTimeRemaining())"
-        }
-    }
+
     
     var body: some View {
         VStack(alignment: .center, spacing: 12) {
@@ -60,8 +47,8 @@ struct MenuBarView: View {
 
             // display time remaining and battery health
             GroupBox {
-                Text("Time Remaining: \(timeRemainingText)").widgetText()
-                Text("Battery Health: \(monitor.batteryHealth)").widgetText()
+                Text("Time Remaining: \(monitor.timeRemainingText)").widgetText()
+                Text("Battery Health: \(monitor.info?.batteryHealth ?? 0)").widgetText()
             }
             
             HStack {
@@ -91,10 +78,7 @@ struct MenuBarView: View {
         }
         .padding(EdgeInsets(top: 0, leading: 5, bottom: 10, trailing: 5))
         .frame(width: 200, height: 175)
-        .onAppear { monitor.update() }
+        .onAppear { monitor.getBatteryInfo() }
     }
 }
 
-#Preview {
-    MenuBarView()
-}

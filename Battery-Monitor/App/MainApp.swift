@@ -25,8 +25,9 @@ struct MainApp: App {
     var body: some Scene {
         WindowGroup("Battery Monitor", id: "main") {
             WindowView()
-                .background(.clear.opacity(0.2))
                 .preferredColorScheme(colorScheme)
+                .environmentObject(monitor)
+
         }
         
         
@@ -35,6 +36,7 @@ struct MainApp: App {
             MenuBarView()
                 .background(.clear.opacity(0.2))
                 .preferredColorScheme(colorScheme)
+                .environmentObject(monitor)
 
                 
         } label: {
@@ -62,7 +64,9 @@ struct MainApp: App {
             SettingsView()
                 .background(.clear.opacity(0.2))
                 .preferredColorScheme(colorScheme)
-                .frame(minWidth: 500, minHeight: 500)
+                .frame(width: 400, height: 500)
+                .environmentObject(monitor)
+
         }
         .windowResizability(.automatic)
         #endif

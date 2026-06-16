@@ -32,6 +32,7 @@ class CPUService: ObservableObject {
     private var oldSys: UInt32?
     private var oldIdle: UInt32?
     private var activeCores = ProcessInfo.processInfo.activeProcessorCount
+    
 
     // the info is updated every 2 seconds
     init() {

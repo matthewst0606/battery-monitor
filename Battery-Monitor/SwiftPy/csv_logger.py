@@ -2,9 +2,13 @@ import pandas as pd
 # returns the data from system_info.csv and adds a new row
 # if the device is on battery power
 # -------------------------------------------------
-def insert_row(system_info, process_df, cpu_df, gpu_df, battery_info, encoded_battery_info):
+def insert_row(system_info, process_df, gpu_df, battery_info, encoded_battery_info):
     # read current data from system_info.csv
     battery_df = pd.read_csv("data/system_info.csv")
+    
+    cpu_df = pd.read_csv("../Services/Data/cpu.csv")
+    memory_df = pd.read_csv("../Services/Data/memory.csv")
+    
 
     # create a new row when new data is collected
     new_row = {
@@ -17,19 +21,22 @@ def insert_row(system_info, process_df, cpu_df, gpu_df, battery_info, encoded_ba
         "Low_Power_Mode": encoded_battery_info["low_power_mode"],
 
         "Process_Count": system_info["Process_Count"],
-        "Total_Memory": system_info["Total_Memory"],
-        "Used_Memory": system_info["Used_Memory"],
-
-
         "Process_Power": round(process_df["POWER"].sum(), 2),
         "Process_State": process_df["STATE"].sum(),
 
-        "CPU_Usage": system_info["CPU_Usage"],
-        "Avg_CPU_Frequency": round(cpu_df["active_frequency"].mean(), 2),
-        "Avg_CPU_Residency": round(cpu_df["active_residency"].mean(), 2),
-        "Avg_CPU_Idle": cpu_df["idle_residency"].mean(),
-        "CPU_Power": cpu_df["cpu_power"].iloc[0],
 
+        # new CPU cols
+        "CPU_Usage": cpu_df["cpuTotal"].iloc[-1],
+        "CPU_User": cpu_df["cpuUser"].iloc[-1],
+        "CPU_System": cpu_df["cpuSystem"].iloc[-1],
+        "CPU_Idle": cpu_df["cpuIdle"].iloc[-1],
+        
+        
+        # new memory cols
+        "Total_Memory": memory_df["totalGB"].iloc[-1],
+        "Used_Memory": memory_df["usedGB"].iloc[-1],
+        "Cached_Memory": memory_df["cachedGB"].iloc[-1],
+        "Available_Memory": memory_df["availableGB"].iloc[-1],
 
         "GPU_Power": gpu_df["gpu_power"].iloc[0],
         "Avg_GPU_Frequency": gpu_df["active_frequency"].iloc[0],

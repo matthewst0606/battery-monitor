@@ -11,16 +11,29 @@ enum menubarFormat: String, CaseIterable, Identifiable {
     var id: Self {self}
 }
 
+enum updateInterval: String, CaseIterable, Identifiable {
+    case one, two, three, five, ten
+    var id: Self {self}
+}
+
+enum powermetricsInterval: String, CaseIterable, Identifiable {
+    case fifteen, thirty, sixty
+    var id: Self {self}
+}
+
 
 struct SettingsView: View {
-    @StateObject private var monitor = BatteryMonitor()
+    @EnvironmentObject var monitor: BatteryMonitor
     @StateObject private var modelRunner = PythonModelRunner()
     
     @AppStorage("showPreview") private var showPreview = true
     @AppStorage("fontSize") private var fontSize = 14.0
     @AppStorage("selectedColor") private var selectedColorData: Data = Data()
-    @AppStorage("selectedMode") var selecteMode: Mode = .system
+    
+    @AppStorage("selectedMode") var selectedMode: Mode = .system
     @AppStorage("selectedFormat") var selectedFormat: menubarFormat = .regular
+    @AppStorage("selectedUpdateInterval") var selectedUpdateInterval: updateInterval = .two
+    @AppStorage("selectedPowermetricsInterval") var selectedPowermetricsInterval: powermetricsInterval = .thirty
     
     @State private var colorPickerColor: Color = .blue
     @State private var menuBarBattery = true
@@ -28,6 +41,9 @@ struct SettingsView: View {
     @State private var pythonOutput = ""
 
 
+    
+    
+    
     
     private func createToggle(_ title: String, isOn: Binding<Bool>) -> some View {
         GridRow {
@@ -46,9 +62,9 @@ struct SettingsView: View {
     
     // creates the elements of the general tab in settings
     private var GeneralTabView: some View {
-        VStack {
+        VStack(alignment: .center) {
             List {
-                Picker("Appearance", selection: $selecteMode) {
+                Picker("Appearance", selection: $selectedMode) {
                     Text("System").tag(Mode.system)
                     Text("Dark").tag(Mode.dark)
                     Text("Light").tag(Mode.light)
@@ -57,6 +73,21 @@ struct SettingsView: View {
                 Picker("Menubar Format", selection: $selectedFormat) {
                     Text("Default").tag(menubarFormat.regular)
                     Text("Compact").tag(menubarFormat.compact)
+                }.padding()
+                
+                Picker("Update Interval", selection: $selectedUpdateInterval) {
+                    Text("1s").tag(updateInterval.one)
+                    Text("2s (default)").tag(updateInterval.two)
+                    Text("3s").tag(updateInterval.three)
+                    Text("5s").tag(updateInterval.five)
+                    Text("10s").tag(updateInterval.ten)
+
+                }.padding()
+                
+                Picker("Powermetrics Interval", selection: $selectedPowermetricsInterval) {
+                    Text("15s").tag(powermetricsInterval.fifteen)
+                    Text("30s (default)").tag(powermetricsInterval.thirty)
+                    Text("60s").tag(powermetricsInterval.sixty)
                 }.padding()
 
                 Toggle("Show in Menubar", isOn: $menuBarBattery)

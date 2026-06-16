@@ -7,8 +7,8 @@
 
 import SwiftUI
 
-struct MemoryTabView: View {
-    @StateObject private var monitor = BatteryMonitor()
+struct MemoryPowermetricsView: View {
+    @EnvironmentObject var monitor: BatteryMonitor
     @EnvironmentObject var modelRunner: PythonModelRunner
 
     var body: some View {
@@ -19,4 +19,45 @@ struct MemoryTabView: View {
             }
         }
     }
+}
+
+
+struct MemoryTabView: View {
+    @EnvironmentObject var mem: MemoryService
+
+    var body: some View {
+        VStack(spacing: 5) {
+            HStack {
+                Text("Memory").font(.system(size: 14, weight: .bold))
+                Image(systemName: "memorychip").imageScale(.large)
+            }
+            
+            List {
+                if let memory = mem.info {
+                    HStack {
+                        Text("Total:").ListText()
+                        Spacer()
+                        Text("\(memory.total, specifier: "%.2f")GB").ListText()
+                    }
+                    HStack {
+                        Text("Used:").ListText()
+                        Spacer()
+                        Text("\(memory.used, specifier: "%.2f")GB").ListText()
+                    }
+                    HStack {
+                        Text("Available:").ListText()
+                        Spacer()
+                        Text("\(memory.available, specifier: "%.2f")GB").ListText()
+                    }
+                    HStack {
+                        Text("Cached:").ListText()
+                        Spacer()
+                        Text("\(memory.cached, specifier: "%.2f")GB").ListText()
+                    }
+                }
+            }.unscrollableListStyle()
+        }.appTabStyle()
+    }
+    
+
 }

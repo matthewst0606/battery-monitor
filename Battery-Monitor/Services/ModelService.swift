@@ -80,19 +80,14 @@ class PythonModelRunner: ObservableObject {
         do { try process.run() }
         catch { print("Failed to run Python:", error) }
         
-        let output = String(
-            data: outputPipe.fileHandleForReading.readDataToEndOfFile(),
-            encoding: .utf8
-        ) ?? ""
-        let error = String(
-            data: errorPipe.fileHandleForReading.readDataToEndOfFile(),
-            encoding: .utf8
-        ) ?? ""
+        let output = String(data: outputPipe.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8) ?? ""
+        let error = String(data: errorPipe.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8) ?? ""
         
-        if !error.isEmpty {
+        guard error.isEmpty else {
             print("Python error:", error)
             return error
         }
+        
         
         if let data = output.data(using: .utf8),
            let result = try? JSONDecoder().decode(PythonResult.self, from: data) {
@@ -106,9 +101,11 @@ class PythonModelRunner: ObservableObject {
                     )
 
                 )
-                if self.outputHistory.count > 48 {
-                    self.outputHistory.removeFirst()
-                }
+                if self.outputHistory.count > 48 { self.outputHistory.removeFirst() }
+                
+                
+                
+                
                 self.batteryPercent = Int(result.features["Battery_Percent"] ?? 0)
                 
                 self.batteryPercent = Int(result.features["Battery_Percent"] ?? 0)
@@ -167,7 +164,7 @@ class PythonModelRunner: ObservableObject {
         return (process, outputPipe, errorPipe)
     }
     
-    
+
     
     func updatePy() {
         self.modelOutput = "Loading..."

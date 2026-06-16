@@ -7,15 +7,7 @@ from sklearn.preprocessing import StandardScaler
 from battery_data import GetBatteryData
 from encoder import encode
 from csv_logger import insert_row, process_row, gpu_row, cpu_row
-
 from battery_model import BatteryModel
-
-# more potential features
-#-------------------------------
-# 1. better automatic brightness adjustment based on current system data/usage.
-# e.g. say like a user wants to get n hours out of their battery, the model can adjust
-# brightness levels and other system factors to try and adjust to that request
-# 2. Battery drain rate
 
 
 data = GetBatteryData()
@@ -46,12 +38,11 @@ if encoded_battery_info == None:
 
 # access the dataframe
 process_df = process_row(process_info)
-cpu_df = cpu_row(powermetrics_info)
 gpu_df = gpu_row(powermetrics_info)
+
 df = insert_row(
     system_info,
     process_df,
-    cpu_df,
     gpu_df,
     battery_info,
     encoded_battery_info
@@ -71,18 +62,22 @@ feature_columns = [
     "Battery_Percent",
     "Maximum_Capacity",
     "Process_Count",
-    "CPU_Usage",
-    "Total_Memory",
-    "Used_Memory",
     "Cycle_Count",
     "Charging",
     "Low_Power_Mode",
     "Process_Power",
     "Process_State",
-    "Avg_CPU_Frequency",
-    "Avg_CPU_Residency",
-    "Avg_CPU_Idle",
-    "CPU_Power",
+    
+    "CPU_Usage",
+    "CPU_User",
+    "CPU_System",
+    "CPU_Idle",
+    
+    "Total_Memory",
+    "Used_Memory",
+    "Cached_Memory",
+    "Available_Memory",
+    
     "GPU_Power",
     "Avg_GPU_Frequency",
     "Avg_GPU_Residency",
@@ -139,10 +134,20 @@ y_val = target_data[validation_idx]
 # --------------------------------------------------
 b_model = BatteryModel(device) # initialize the model and optimizer
 print('\n')
-#b_model.run_model(x_train, y_train) # running the model
+
+
+
+
+
+
+# ***** comment out later for actual app *****
+
+b_model.run_model(x_train, y_train) # running the model
 
 # --- evaluate model results on validation data ---
-#actual_y, predicted_y, val_loss = b_model.evaluate_model(device, x_val, y_val, y_scaler)
+actual_y, predicted_y, val_loss = b_model.evaluate_model(device, x_val, y_val, y_scaler)
+#----------------------------------------------
+
 
 
 
