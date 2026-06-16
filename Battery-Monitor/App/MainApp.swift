@@ -27,6 +27,8 @@ struct MainApp: App {
             WindowView()
                 .preferredColorScheme(colorScheme)
                 .environmentObject(monitor)
+                .background(.bar)
+
 
         }
         

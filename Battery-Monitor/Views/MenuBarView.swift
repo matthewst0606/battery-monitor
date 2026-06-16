@@ -78,7 +78,6 @@ struct MenuBarView: View {
         }
         .padding(EdgeInsets(top: 0, leading: 5, bottom: 10, trailing: 5))
         .frame(width: 200, height: 175)
-        .onAppear { monitor.getBatteryInfo() }
     }
 }
 

@@ -17,38 +17,72 @@ extension View {
     
     func ListText() -> some View {
         self
-        .font(.system(size: 11, weight: .regular))
-        .padding(.vertical,2)
-        .padding(.horizontal,5)
+            .font(.system(size: 11, weight: .regular))
+            .padding(.vertical,2)
+            .padding(.horizontal,5)
     }
     
+    func ListItem(arg1: String, arg2: String) -> some View {
+        return HStack {
+            Text(arg1)
+            Spacer()
+            Text(arg2)
+        }
+    }
+    
+    func createTab(title: String, tag: String, selectedStat: Binding<String>) -> some View {
+        Button {
+            withAnimation(.easeInOut) {
+                selectedStat.wrappedValue = tag
+            }
+        }
+        label: {
+            Text(title).tabBarButtonAnimation(isSelected: selectedStat.wrappedValue == tag)
+        }
+        .tabBarButton(val: selectedStat.wrappedValue, isSelected: selectedStat.wrappedValue == tag)
+    }
+        
     
     func unscrollableListStyle() -> some View {
         self
-        .listStyle(.inset)
-        .background(.thinMaterial)
-        .clipShape(RoundedRectangle(cornerRadius: 10))
-        .scrollDisabled(true)
+            .listStyle(.inset)
+            .background(.thinMaterial)
+            .clipShape(RoundedRectangle(cornerRadius: 10))
+            .scrollDisabled(true)
     }
     
-    func tabBarButton(val: String) -> some View {
+    func tabBarButton(val: String, isSelected: Bool) -> some View {
         self
-            .buttonStyle(.glass(.clear))
+            .buttonStyle(isSelected ? .glass(.clear) : .glass(.regular))
             .buttonSizing(.flexible)
             .animation(.easeInOut, value: val)
     }
     
     func tabBarButtonAnimation(isSelected: Bool) -> some View {
-        self
-            .padding(.horizontal, isSelected ? 10 : 5)
-            .padding(.vertical, isSelected ? 10 : 5)
+        if isSelected {
+            self
+                .font(.system(size: 14, weight: .bold))
+                .padding(.horizontal, 7)
+                .padding(.vertical, 7)
+        }
+        else {
+            self
+                .font(.system(size: 11, weight: .regular))
+                .padding(.horizontal, 3)
+                .padding(.vertical, 5)
+        }
+        
+        
+        
     }
-    
+        
+        
+        
     func appTabStyle() -> some View {
         self
             .padding(20)
             .frame(width: 300, height: 200)
-            .background(.regularMaterial)
+            .background(.clear)
             .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
     }
     
@@ -58,7 +92,9 @@ extension View {
         { self.padding(8).buttonStyle(.plain).glassEffect() }
 }
 
+
+
 extension Toggle {
     func getToggleStyle() -> some View
-        { self.padding().toggleStyle(.switch) }
+    { self.padding().toggleStyle(.switch) }
 }

@@ -8,17 +8,20 @@
 import SwiftUI
 
 struct MemoryPowermetricsView: View {
-    @EnvironmentObject var monitor: BatteryMonitor
     @EnvironmentObject var modelRunner: PythonModelRunner
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 5) {
-            GroupBox {
-                Text("Total Memory: \(modelRunner.totalMemory, specifier: "%.2f") GB").widgetText()
-                Text("Used Memory: \(modelRunner.usedMemory, specifier: "%.2f") GB").widgetText()
+        VStack(spacing: 5) {
+            List {
+                ListItem(arg1: "Total Memory", arg2: String(format: "%.2fGB", modelRunner.usedMemory))
+                ListItem(arg1: "Used Memory", arg2: String(format: "%.2fGB", modelRunner.usedMemory))
             }
+            .unscrollableListStyle()
         }
+        .appTabStyle()
     }
+
+    
 }
 
 
@@ -27,33 +30,13 @@ struct MemoryTabView: View {
 
     var body: some View {
         VStack(spacing: 5) {
-            HStack {
-                Text("Memory").font(.system(size: 14, weight: .bold))
-                Image(systemName: "memorychip").imageScale(.large)
-            }
-            
             List {
                 if let memory = mem.info {
-                    HStack {
-                        Text("Total:").ListText()
-                        Spacer()
-                        Text("\(memory.total, specifier: "%.2f")GB").ListText()
-                    }
-                    HStack {
-                        Text("Used:").ListText()
-                        Spacer()
-                        Text("\(memory.used, specifier: "%.2f")GB").ListText()
-                    }
-                    HStack {
-                        Text("Available:").ListText()
-                        Spacer()
-                        Text("\(memory.available, specifier: "%.2f")GB").ListText()
-                    }
-                    HStack {
-                        Text("Cached:").ListText()
-                        Spacer()
-                        Text("\(memory.cached, specifier: "%.2f")GB").ListText()
-                    }
+                    ListItem(arg1: "Total", arg2: String(format: "%.2f GB", memory.total))
+                    ListItem(arg1: "Used", arg2: String(format: "%.2f GB", memory.used))
+                    ListItem(arg1: "Available", arg2: String(format: "%.2f GB", memory.available))
+                    ListItem(arg1: "Cached", arg2: String(format: "%.2f GB", memory.cached))
+
                 }
             }.unscrollableListStyle()
         }.appTabStyle()
