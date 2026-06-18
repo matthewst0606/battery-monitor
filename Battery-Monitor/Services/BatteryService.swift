@@ -41,17 +41,20 @@ class BatteryMonitor: ObservableObject {
     
     init() {
         info = getBatteryInfo()
-        updateTimer = Timer.publish(every: 2, on: .main, in: .common)
-            .autoconnect()
-            .sink { [weak self] _ in
-                guard let self else {return}
-                
-                if let newInfo = self.getBatteryInfo() {
-                    self.info = newInfo
-                    self.logBatteryInfo()
-                }
-                
+        updateTimer = Timer.publish(
+            every: 5,
+            on: .main,
+            in: .common
+        )
+        .autoconnect()
+        .sink { [weak self] _ in
+            guard let self else {return}
+            
+            if let newInfo = self.getBatteryInfo() {
+                self.info = newInfo
+                self.logBatteryInfo()
             }
+        }
     }
     
     
@@ -107,30 +110,37 @@ class BatteryMonitor: ObservableObject {
     private func logBatteryInfo() {
         guard let info = info else { return }
         
-        let url = URL(fileURLWithPath: "/Users/matt/Battery-Monitor/Battery-Monitor/Services/Data/battery.csv")
         
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
-        
-        let timestamp = formatter.string(from: Date())
-        let batteryLevel = String(info.batteryLevel)
-        let timeRemaining = String(format: "%.4f",info.timeRemaining)
-        let isCharging = String(info.isCharging ? 1 : 0)
-        let batteryHealth = String(info.batteryHealth)
-        
-        let row = "\(timestamp),\(batteryLevel),\(timeRemaining),\(isCharging),\(batteryHealth)\n"
-        if !FileManager.default.fileExists(atPath: url.path) {
-            try? row.write(to: url, atomically: true, encoding: .utf8)
+        do {
+            let url = try appDataDirectory(fileName: "battery.csv")
+            
+            
+            let formatter = DateFormatter()
+            formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+            
+            let timestamp = formatter.string(from: Date())
+            let batteryLevel = String(info.batteryLevel)
+            let timeRemaining = String(format: "%.0f",info.timeRemaining)
+            let isCharging = String(info.isCharging ? 1 : 0)
+            let batteryHealth = String(info.batteryHealth)
+            
+            let row = "\(timestamp), \(batteryLevel), \(timeRemaining), \(isCharging), \(batteryHealth)\n"
+            
+            if !FileManager.default.fileExists(atPath: url.path) {
+                try? row.write(to: url, atomically: true, encoding: .utf8)
+            }
+            
+            if let handle = try? FileHandle(forWritingTo: url) {
+                _ = try? handle.seekToEnd()
+                handle.write(row.data(using: .utf8)!)
+                try? handle.close()
+            }
         }
-        
-        if let handle = try? FileHandle(forWritingTo: url) {
-            _ = try? handle.seekToEnd()
-            handle.write(row.data(using: .utf8)!)
-            try? handle.close()
+        catch {
+            print("failed to write battery log!")
+
         }
     }
-    
-    
     
     
     // formatting:

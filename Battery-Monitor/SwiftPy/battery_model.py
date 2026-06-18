@@ -10,7 +10,7 @@ class BatteryModel:
         self.loss_fc = nn.L1Loss()
 
         self.model = nn.Sequential(
-            nn.Linear(20, 128), # 19 refers to input size
+            nn.Linear(24, 128), # 19 refers to input size
             nn.ReLU(),
             nn.Linear(128, 64),
             nn.ReLU(),

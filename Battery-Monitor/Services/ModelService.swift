@@ -46,25 +46,18 @@ class PythonModelRunner: ObservableObject {
             self.name = name
             self.prediction = prediction
             let calendar = Calendar.autoupdatingCurrent
-            self.timestamp =
-                calendar.date(from: DateComponents(hour: hour))!
+            self.timestamp = calendar.date(from: DateComponents(hour: hour))!
         }
     }
     @Published var outputHistory: [TimeRemaining] = []
     
+    
     init() {
-        pythonTimer = Timer.publish(every: 900, on: .main, in: .common)
+        pythonTimer = Timer.publish(every: 120, on: .main, in: .common)
             .autoconnect()
             .sink { [weak self] _ in
-                print("timer fired")
-
-                guard let self = self, !self.isRunningPython else {
-                    print("timer blocked")
-                    return
-                }
+                guard let self = self, !self.isRunningPython else { return }
                 self.isRunningPython = true
-                
-                
                 
                 DispatchQueue.global(qos: .background).async {
                     _ = self.getPy()
@@ -77,14 +70,25 @@ class PythonModelRunner: ObservableObject {
     func getPy() -> String {
         let (process, outputPipe, errorPipe) = makePythonProcess()
         
-        do { try process.run() }
-        catch { print("Failed to run Python:", error) }
+        do {
+            try process.run()
+        }
+        catch {
+            print("Failed to run Python:", error)
+        }
         
-        let output = String(data: outputPipe.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8) ?? ""
-        let error = String(data: errorPipe.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8) ?? ""
+        let output = String(
+            data: outputPipe.fileHandleForReading.readDataToEndOfFile(),
+            encoding: .utf8
+        ) ?? ""
+        let error = String(
+            data: errorPipe.fileHandleForReading.readDataToEndOfFile(),
+            encoding: .utf8
+        ) ?? ""
+        
         
         guard error.isEmpty else {
-            print("Python error:", error)
+            print("Battery Model error occured!:", error)
             return error
         }
         
@@ -108,8 +112,12 @@ class PythonModelRunner: ObservableObject {
                 
                 self.batteryPercent = Int(result.features["Battery_Percent"] ?? 0)
                 
-                self.batteryPercent = Int(result.features["Battery_Percent"] ?? 0)
-                self.batteryCondition = String(Int(result.features["Battery_Condition"] ?? 0))
+                let condition = Int(result.features["Battery_Condition"] ?? 0)
+                switch condition {
+                case 0: self.batteryCondition = "Normal"
+                case 1: self.batteryCondition = "Service Recommended"
+                default: self.batteryCondition = "Battery Condition Unknown"
+                }
                 
                 self.maximumCapacity = Int(result.features["Maximum_Capacity"] ?? 0)
                 self.totalMemory = Double(result.features["Total_Memory"] ?? 0)
@@ -121,10 +129,10 @@ class PythonModelRunner: ObservableObject {
                 self.processState = Int(result.features["Process_State"] ?? 0)
                 
                 self.CpuUsage = Double(result.features["CPU_Usage"] ?? 0)
-                self.CpuFrequency = Double(result.features["Avg_CPU_Frequency"] ?? 0)
-                self.CpuResidency = Double(result.features["Avg_CPU_Residency"] ?? 0)
-                self.CpuIdle = Double(result.features["Avg_CPU_Idle"] ?? 0)
-                self.CpuPower = Double(result.features["CPU_Power"] ?? 0)
+                self.CpuFrequency = Double(result.features["old_CPU_Frequency"] ?? 0)
+                self.CpuResidency = Double(result.features["old_CPU_Residency"] ?? 0)
+                self.CpuIdle = Double(result.features["CPU_Idle"] ?? 0)
+                self.CpuPower = Double(result.features["old_CPU_Power"] ?? 0)
 
                 self.GpuPower = Double(result.features["GPU_Power"] ?? 0)
                 self.GpuFrequency = Double(result.features["Avg_GPU_Frequency"] ?? 0)
@@ -136,7 +144,6 @@ class PythonModelRunner: ObservableObject {
                     Prediction: \(result.prediction)
                     Battery: \(Int(result.features["Battery_Percent"] ?? 0))%
                     CPU Usage: \(result.features["CPU_Usage"] ?? 0)%
-                    
                 """
             }
         }
@@ -166,11 +173,15 @@ class PythonModelRunner: ObservableObject {
     
 
     
+    
+    
     func updatePy() {
         self.modelOutput = "Loading..."
         DispatchQueue.global(qos: .background).async {
             let result = self.getPy()
-            DispatchQueue.main.async { self.modelOutput = result }
+            DispatchQueue.main.async {
+                self.modelOutput = result
+            }
         }
     }
 }

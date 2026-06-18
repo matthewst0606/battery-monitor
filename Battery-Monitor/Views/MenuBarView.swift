@@ -15,7 +15,6 @@ struct MenuBarView: View {
     @EnvironmentObject var monitor: BatteryMonitor
     @AppStorage("selectedColor") private var selectedColorData: Data = Data()
     @State private var selectedAccentColor: Color = .accentColor
-    @State private var pythonOutput = ""
     
     @Environment(\.openWindow) private var openWindow
     @Environment(\.openSettings) private var openSettings
@@ -59,20 +58,19 @@ struct MenuBarView: View {
                         .foregroundStyle(Color.primary, Color.dataToColor(from: selectedColorData) ?? selectedAccentColor)
                 }
                 .frame(width: 25, height: 15)
-                .buttonGlassEffect()
+                .padding()
+                .buttonStyle(.glass)
 
                 
                 Button { openSettings() }
                 label: {
                     Image(systemName: "gearshape.fill")
-                    
                         .font(.system(size: 20, weight: .bold))
                         .foregroundStyle(Color.dataToColor(from: selectedColorData) ?? selectedAccentColor)
-
-                    
                 }
                 .frame(width: 25, height: 15)
-                .buttonGlassEffect()
+                .padding()
+                .buttonStyle(.glass)
 
             }
         }

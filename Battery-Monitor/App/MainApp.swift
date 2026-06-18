@@ -6,6 +6,9 @@ import AppKit
 struct MainApp: App {
     @StateObject private var monitor = BatteryMonitor()
     @StateObject private var modelRunner = PythonModelRunner()
+    @StateObject var mem =  MemoryService()
+    @StateObject private var cpu = CPUService()
+    
     @State private var settings = SettingsView()
     @AppStorage("selectedColor") private var selectedColorData: Data = Data()
     @State private var selectedAccentColor: Color = .accentColor
@@ -26,9 +29,11 @@ struct MainApp: App {
         WindowGroup("Battery Monitor", id: "main") {
             WindowView()
                 .preferredColorScheme(colorScheme)
-                .environmentObject(monitor)
                 .background(.bar)
-
+                .environmentObject(monitor)
+                .environmentObject(modelRunner)
+                .environmentObject(cpu)
+                .environmentObject(mem)
 
         }
         
@@ -41,7 +46,8 @@ struct MainApp: App {
                 .environmentObject(monitor)
 
                 
-        } label: {
+        }
+        label: {
             HStack {
                 Image(systemName: monitor.batteryIcon)
                     .font(.system(size: 16, weight: .medium))
@@ -64,10 +70,10 @@ struct MainApp: App {
         #if os(macOS)
         Settings {
             SettingsView()
-                .background(.clear.opacity(0.2))
+                .frame(minWidth: 300, maxWidth: 500, minHeight: 500, maxHeight: 1000)
                 .preferredColorScheme(colorScheme)
-                .frame(width: 400, height: 500)
                 .environmentObject(monitor)
+                .environmentObject(cpu)
 
         }
         .windowResizability(.automatic)

@@ -4,7 +4,6 @@
 //
 //  Created by Matt on 6/1/26.
 //
-
 import SwiftUI
 
 
@@ -17,17 +16,22 @@ extension View {
     
     func ListText() -> some View {
         self
-            .font(.system(size: 11, weight: .regular))
+            .font(.system(size: 12, weight: .regular))
             .padding(.vertical,2)
             .padding(.horizontal,5)
     }
     
-    func ListItem(arg1: String, arg2: String) -> some View {
+    func ListItem(arg1: String, arg2: String, arg3: Color) -> some View {
         return HStack {
             Text(arg1)
             Spacer()
             Text(arg2)
+                .font(.system(size: 12, weight: .bold))
+                .foregroundStyle(arg3)
+                
         }
+        .padding(.vertical, 5)
+        .padding(.horizontal, 10)
     }
     
     func createTab(title: String, tag: String, selectedStat: Binding<String>) -> some View {
@@ -37,9 +41,14 @@ extension View {
             }
         }
         label: {
-            Text(title).tabBarButtonAnimation(isSelected: selectedStat.wrappedValue == tag)
+            Text(title).tabBarButtonAnimation(
+                isSelected: selectedStat.wrappedValue == tag
+            )
         }
-        .tabBarButton(val: selectedStat.wrappedValue, isSelected: selectedStat.wrappedValue == tag)
+        .tabBarButton(
+            val: selectedStat.wrappedValue,
+            isSelected: selectedStat.wrappedValue == tag
+        )
     }
         
     
@@ -52,49 +61,52 @@ extension View {
     }
     
     func tabBarButton(val: String, isSelected: Bool) -> some View {
-        self
-            .buttonStyle(isSelected ? .glass(.clear) : .glass(.regular))
-            .buttonSizing(.flexible)
-            .animation(.easeInOut, value: val)
+        if isSelected {
+            self
+                .buttonStyle(.glass(.clear))
+                .buttonSizing(.flexible)
+                .background(.blue.opacity(0.7), in: .capsule)
+                .buttonBorderShape(.roundedRectangle)
+                .animation(.easeInOut, value: val)
+                .shadow(radius: 10)
+        }
+        else {
+            self
+                .buttonStyle(.glass(.regular))
+                .buttonSizing(.flexible)
+                .background(.clear, in: .capsule)
+                .buttonBorderShape(.roundedRectangle)
+                .animation(.easeInOut, value: val)
+                .shadow(radius: 5)
+        }
     }
     
     func tabBarButtonAnimation(isSelected: Bool) -> some View {
         if isSelected {
             self
                 .font(.system(size: 14, weight: .bold))
-                .padding(.horizontal, 7)
-                .padding(.vertical, 7)
+                .padding(.horizontal, 0)
+                .padding(.vertical, 5)
         }
         else {
             self
                 .font(.system(size: 11, weight: .regular))
-                .padding(.horizontal, 3)
+                .padding(.horizontal, 5)
                 .padding(.vertical, 5)
         }
-        
-        
-        
     }
-        
         
         
     func appTabStyle() -> some View {
         self
-            .padding(20)
-            .frame(width: 300, height: 200)
+            .frame(minWidth: 300, maxWidth: 500)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 5)
             .background(.clear)
             .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
     }
-    
-    func getGlassEffect() -> some View
-        { self.glassEffect(.clear) }
-    func buttonGlassEffect() -> some View
-        { self.padding(8).buttonStyle(.plain).glassEffect() }
 }
 
 
 
-extension Toggle {
-    func getToggleStyle() -> some View
-    { self.padding().toggleStyle(.switch) }
-}
+

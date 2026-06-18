@@ -25,10 +25,9 @@ class MemoryService: ObservableObject {
     private var phyMemory = ProcessInfo.processInfo.physicalMemory
     
     
-    // the info is updated every 2 seconds
     init() {
         info = getMemoryInfo()
-        updateTimer = Timer.publish(every: 2, on: .main, in: .common)
+        updateTimer = Timer.publish(every: 5, on: .main, in: .common)
             .autoconnect()
             .sink { [weak self] _ in
                 guard let self else {return}
@@ -86,38 +85,38 @@ class MemoryService: ObservableObject {
             cached: cachedGB
         )
     }
-    
+
     
     
     private func logMemoryInfo() {
-        let url = URL(fileURLWithPath: "/Users/matt/Battery-Monitor/Battery-Monitor/Services/Data/memory.csv")
-        
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
-        
-        
-        let timestamp = formatter.string(from: Date())
-        let totalGB = String(format: "%.4f", info?.total ?? 0)
-        let usedGB = String(format: "%.4f",info?.used ?? 0)
-        let cachedGB = String(format: "%.4f",info?.cached ?? 0)
-        let availableGB = String(format: "%.4f",info?.available ?? 0)
-        
-        let row = "\(timestamp),\(totalGB),\(usedGB),\(cachedGB),\(availableGB)\n"
-        
-        if !FileManager.default.fileExists(atPath: url.path) {
-            try? "timestamp,cpuTotal,cpuUser,cpuSystem,cpuIdle\n"
-                .write(to: url, atomically: true, encoding: .utf8)
+        do {
+            let url = try appDataDirectory(fileName: "memory.csv")
+            
+            let formatter = DateFormatter()
+            formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+            let timestamp = formatter.string(from: Date())
+
+            let totalGB = String(format: "%.0f", info?.total ?? 0)
+            let usedGB = String(format: "%.2f",info?.used ?? 0)
+            let cachedGB = String(format: "%.2f",info?.cached ?? 0)
+            let availableGB = String(format: "%.2f",info?.available ?? 0)
+            
+            let row = "\(timestamp), \(totalGB), \(usedGB), \(cachedGB), \(availableGB)\n"
+            
+            if !FileManager.default.fileExists(atPath: url.path) {
+                try? "timestamp, totalGB, usedGB, cachedGB, availableGB\n"
+                    .write(to: url, atomically: true, encoding: .utf8)
+            }
+            
+            if let handle = try? FileHandle(forWritingTo: url) {
+                _ = try? handle.seekToEnd()
+                handle.write(row.data(using: .utf8)!)
+                try? handle.close()
+            }
+            
         }
-        
-        if let handle = try? FileHandle(forWritingTo: url) {
-            _ = try? handle.seekToEnd()
-            handle.write(row.data(using: .utf8)!)
-            try? handle.close()
+        catch {
+            print("failed to write memory log!")
         }
     }
-    
-    
-    
-    
-    
 }

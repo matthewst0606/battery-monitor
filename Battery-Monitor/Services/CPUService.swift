@@ -8,6 +8,7 @@
 import MachO
 import Foundation
 import Combine
+import SwiftUI
 
 struct RawCPUInfo {
     let processorCount: UInt32
@@ -25,57 +26,85 @@ struct CPUInfo {
 
 
 
+
 class CPUService: ObservableObject {
     @Published var info: CPUInfo?
-    private var updateTimer: AnyCancellable?
     private var oldUser: UInt32?
     private var oldSys: UInt32?
     private var oldIdle: UInt32?
     private var activeCores = ProcessInfo.processInfo.activeProcessorCount
     
+    @AppStorage("selectedUpdateInterval") var selectedUpdateInterval: UpdateInterval = .five
 
+    private var updateTimer: AnyCancellable?
+    
+    func createTimer() {
+        updateTimer?.cancel()
+        
+        updateTimer = Timer.publish(
+            every: TimeInterval(selectedUpdateInterval.rawValue),
+            on: .main,
+            in: .common
+        )
+        .autoconnect()
+        .sink { [weak self] _ in
+            guard let self else {return}
+            
+            if let newInfo = self.getProcessorInfo() {
+                self.info = newInfo
+                _ = self.getProcessorInfo()
+            }
+        }
+    }
+    
     // the info is updated every 2 seconds
     init() {
-        info = getProcessorInfo()
-        updateTimer = Timer.publish(every: 2, on: .main, in: .common)
-            .autoconnect()
-            .sink { [weak self] _ in
-                guard let self else {return}
-                
-                if let newInfo = self.getProcessorInfo() {
-                    self.info = newInfo
-                    self.logCPUInfo()
-                }
-                
-            }
+        self.info = getProcessorInfo()
+        createTimer()
     }
     
     
+    func getChipName() -> String {
+        var size: size_t = 0
+
+        sysctlbyname("machdep.cpu.brand_string", nil, &size, nil, 0)
+        var cpu = [CChar](repeating: 0, count: size)
+
+        sysctlbyname("machdep.cpu.brand_string", &cpu, &size, nil, 0)
+        return String(cString: cpu)
+    }
+    
     
     private func logCPUInfo() {
-        let url = URL(fileURLWithPath: "/Users/matt/Battery-Monitor/Battery-Monitor/Services/Data/cpu.csv")
-        
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
-        
-        
-        let timestamp = formatter.string(from: Date())
-        let cpuTotal = String(format: "%.4f", info?.total ?? 0)
-        let cpuUser = String(format: "%.4f",info?.user ?? 0)
-        let cpuSystem = String(format: "%.4f",info?.sys ?? 0)
-        let cpuIdle = String(format: "%.4f",info?.idle ?? 0)
-        
-        let row = "\(timestamp),\(cpuTotal),\(cpuUser),\(cpuSystem),\(cpuIdle)\n"
-        
-        if !FileManager.default.fileExists(atPath: url.path) {
-            try? "timestamp,cpuTotal,cpuUser,cpuSystem,cpuIdle\n"
-                .write(to: url, atomically: true, encoding: .utf8)
+        do {
+            let url = try appDataDirectory(fileName: "cpu.csv")
+            
+            
+            let formatter = DateFormatter()
+            formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+            
+            
+            let timestamp = formatter.string(from: Date())
+            let cpuTotal = String(format: "%.2f", info?.total ?? 0)
+            let cpuUser = String(format: "%.2f",info?.user ?? 0)
+            let cpuSystem = String(format: "%.2f",info?.sys ?? 0)
+            let cpuIdle = String(format: "%.2f",info?.idle ?? 0)
+            
+            let row = "\(timestamp), \(cpuTotal), \(cpuUser), \(cpuSystem), \(cpuIdle)\n"
+            
+            if !FileManager.default.fileExists(atPath: url.path) {
+                try? "timestamp, cpuTotal, cpuUser, cpuSystem, cpuIdle\n"
+                    .write(to: url, atomically: true, encoding: .utf8)
+            }
+            
+            if let handle = try? FileHandle(forWritingTo: url) {
+                _ = try? handle.seekToEnd()
+                handle.write(row.data(using: .utf8)!)
+                try? handle.close()
+            }
         }
-        
-        if let handle = try? FileHandle(forWritingTo: url) {
-            _ = try? handle.seekToEnd()
-            handle.write(row.data(using: .utf8)!)
-            try? handle.close()
+        catch {
+            print("failed to write cpu log!")
         }
     }
     

@@ -39,14 +39,19 @@ if encoded_battery_info == None:
 # access the dataframe
 process_df = process_row(process_info)
 gpu_df = gpu_row(powermetrics_info)
+cpu_usage = cpu_row(powermetrics_info)
 
 df = insert_row(
     system_info,
     process_df,
+    cpu_usage,
     gpu_df,
     battery_info,
     encoded_battery_info
 )
+
+
+
 
 
 ## selecting device (M series chip) if available
@@ -77,6 +82,11 @@ feature_columns = [
     "Used_Memory",
     "Cached_Memory",
     "Available_Memory",
+    
+    "old_CPU_Power",
+    "old_CPU_Frequency",
+    "old_CPU_Residency",
+    "old_CPU_idle",
     
     "GPU_Power",
     "Avg_GPU_Frequency",
