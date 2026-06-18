@@ -44,21 +44,25 @@ enum PowermetricsInterval: Int, CaseIterable, Identifiable {
     }
 }
 
+
+
+
 // creates the elements of the general tab in settings
 struct GeneralTabView: View {
     @EnvironmentObject var monitor: BatteryMonitor
     @EnvironmentObject var cpu: CPUService
-    
+    @EnvironmentObject var mem: MemoryService
     
     @AppStorage("selectedMode") var selectedMode: Mode = .system
     @AppStorage("selectedFormat") var selectedFormat: menubarFormat = .regular
     @AppStorage("selectedUpdateInterval") var selectedUpdateInterval: UpdateInterval = .five
     @AppStorage("selectedPowermetricsInterval") var selectedPowermetricsInterval: PowermetricsInterval = .thirty
     
-
     @State private var colorPickerColor: Color = .blue
     @State private var menuBarBattery = true
     @State private var enableAutoAdjust = false
+    
+    private let serviceHelper = ServiceHelper()
     
     
     var body: some View {
@@ -69,7 +73,7 @@ struct GeneralTabView: View {
                     Text("Dark").tag(Mode.dark)
                     Text("Light").tag(Mode.light)
                 }.padding()
-
+                
                 Picker("Menubar Format", selection: $selectedFormat) {
                     Text("Default").tag(menubarFormat.regular)
                     Text("Compact").tag(menubarFormat.compact)
@@ -79,7 +83,7 @@ struct GeneralTabView: View {
                     ForEach(UpdateInterval.allCases) { interval in
                         Text(interval.label).tag(interval)
                     }
-
+                    
                 }.padding()
                 
                 Picker("Powermetrics Interval", selection: $selectedPowermetricsInterval) {
@@ -88,7 +92,7 @@ struct GeneralTabView: View {
                     }
                     
                 }.padding()
-
+                
                 Toggle("Show in Menubar", isOn: $menuBarBattery)
                     .padding()
                     .toggleStyle(.switch)
@@ -102,8 +106,8 @@ struct GeneralTabView: View {
             .background(.quinary)
             .clipShape(RoundedRectangle(cornerRadius: 24))
             .padding()
-
-            // quit button
+            
+                // quit button
             Button { NSApp.terminate(nil) }
             label: {
                 Text("Quit App")
@@ -116,12 +120,15 @@ struct GeneralTabView: View {
             .padding()
         }
         .onChange(of: selectedUpdateInterval) {
-            cpu.createTimer()
+            serviceHelper.createTimer {
+                cpu.info = cpu.getProcessorInfo()
+                mem.info = mem.getMemoryInfo()
+                monitor.info = monitor.getBatteryInfo()
+            }
         }
     }
-}
     
-
+}
 
 
 

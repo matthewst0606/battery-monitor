@@ -36,6 +36,11 @@ class PythonModelRunner: ObservableObject {
     private var pythonTimer: AnyCancellable?
     private var isRunningPython = false
     
+    
+    
+    
+    
+    
     struct TimeRemaining: Identifiable {
         let name: String
         let prediction: Double

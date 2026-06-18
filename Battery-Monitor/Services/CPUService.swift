@@ -34,33 +34,17 @@ class CPUService: ObservableObject {
     private var oldIdle: UInt32?
     private var activeCores = ProcessInfo.processInfo.activeProcessorCount
     
-    @AppStorage("selectedUpdateInterval") var selectedUpdateInterval: UpdateInterval = .five
+    private let serviceHelper = ServiceHelper()
 
-    private var updateTimer: AnyCancellable?
     
-    func createTimer() {
-        updateTimer?.cancel()
-        
-        updateTimer = Timer.publish(
-            every: TimeInterval(selectedUpdateInterval.rawValue),
-            on: .main,
-            in: .common
-        )
-        .autoconnect()
-        .sink { [weak self] _ in
-            guard let self else {return}
-            
-            if let newInfo = self.getProcessorInfo() {
-                self.info = newInfo
-                _ = self.getProcessorInfo()
-            }
-        }
-    }
-    
-    // the info is updated every 2 seconds
     init() {
         self.info = getProcessorInfo()
-        createTimer()
+        serviceHelper.createTimer {
+            if let newInfo = self.getProcessorInfo() {
+                self.info = newInfo
+                self.logCPUInfo()
+            }
+        }
     }
     
     

@@ -21,24 +21,22 @@ struct MemoryInfo {
 
 class MemoryService: ObservableObject {
     @Published var info: MemoryInfo?
-    private var updateTimer: AnyCancellable?
     private var phyMemory = ProcessInfo.processInfo.physicalMemory
+    
+    private let serviceHelper = ServiceHelper()
+
     
     
     init() {
-        info = getMemoryInfo()
-        updateTimer = Timer.publish(every: 5, on: .main, in: .common)
-            .autoconnect()
-            .sink { [weak self] _ in
-                guard let self else {return}
-                
-                if let newInfo = self.getMemoryInfo() {
-                    self.info = newInfo
-                    self.logMemoryInfo()
-                }
-                
+        self.info = getMemoryInfo()
+        serviceHelper.createTimer {
+            if let newInfo = self.getMemoryInfo() {
+                self.info = newInfo
+                self.logMemoryInfo()
             }
+        }
     }
+    
     
     func getMemoryInfo() -> MemoryInfo? {
         var stats = vm_statistics64()

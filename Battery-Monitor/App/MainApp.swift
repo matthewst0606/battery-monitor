@@ -74,6 +74,7 @@ struct MainApp: App {
                 .preferredColorScheme(colorScheme)
                 .environmentObject(monitor)
                 .environmentObject(cpu)
+                .environmentObject(mem)
 
         }
         .windowResizability(.automatic)

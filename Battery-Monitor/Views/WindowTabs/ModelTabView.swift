@@ -10,6 +10,7 @@ import SwiftUI
 struct ModelTabView: View {
     @EnvironmentObject var modelRunner: PythonModelRunner
     
+    
     var body: some View {
         VStack {
             HStack {
@@ -21,23 +22,13 @@ struct ModelTabView: View {
             .background(.bar)
             .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
 
-
-            
             ScrollView {
                 Text(modelRunner.modelOutput)
                     .widgetText()
                     .textSelection(.enabled)
             }
         }
-        .padding(20)
-        .frame(minWidth: 500, maxWidth: 500, maxHeight: 500, alignment: .top)
-        .background(.ultraThickMaterial)
-        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-        .frame(minWidth: 600, maxHeight: .infinity, alignment: .top)
+        .windowTabStyle(title: "Model Output")
         .navigationTitle(Text("Model Output"))
-        
-        .onAppear() {
-            modelRunner.updatePy()
-        }
     }
 }

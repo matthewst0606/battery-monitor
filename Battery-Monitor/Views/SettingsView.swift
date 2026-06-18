@@ -7,15 +7,15 @@ import AppKit
 struct SettingsView: View {
     @EnvironmentObject var monitor: BatteryMonitor
     @EnvironmentObject var cpu: CPUService
-    
-    @ViewBuilder private var CustomizeTab: some View {CustomizeTabView()}
-    @ViewBuilder private var GeneralTab: some View {GeneralTabView()}
 
     @AppStorage("selectedColor") private var selectedColorData: Data = Data()
     @State private var colorPickerColor: Color = .blue
     @State private var menuBarBattery = true
     @State private var enableAutoAdjust = false
     
+    
+    private var CustomizeTab: some View { CustomizeTabView() }
+    private var GeneralTab: some View { GeneralTabView() }
 
     var body: some View {
         // create the tabs that are displayed
@@ -23,6 +23,7 @@ struct SettingsView: View {
         TabView {
             GeneralTab.tabItem {
                 Image(systemName: "gearshape")
+                    .environmentObject(monitor)
             }.tag(1)
             
             CustomizeTab.tabItem {

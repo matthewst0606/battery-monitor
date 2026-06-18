@@ -55,7 +55,7 @@ extension View {
     func unscrollableListStyle() -> some View {
         self
             .listStyle(.inset)
-            .background(.thinMaterial)
+            .background(.regularMaterial)
             .clipShape(RoundedRectangle(cornerRadius: 10))
             .scrollDisabled(true)
     }
@@ -104,6 +104,15 @@ extension View {
             .padding(.vertical, 5)
             .background(.clear)
             .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+    }
+    
+    func windowTabStyle(title: String) -> some View {
+        self
+            .frame(minWidth: 500, maxHeight: .infinity, alignment: .top)
+            .padding(20)
+            .background(.ultraThinMaterial)
+            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+            .navigationTitle(Text(title))
     }
 }
 

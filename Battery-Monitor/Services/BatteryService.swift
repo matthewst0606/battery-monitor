@@ -25,8 +25,8 @@ struct BatteryInfo {
 
 class BatteryMonitor: ObservableObject {
     @Published var info: BatteryInfo?
-    private var updateTimer: AnyCancellable?
-    
+    private let serviceHelper = ServiceHelper()
+
     
     // returns a string that displays how long it will take until
     // battery is dead or fully charged
@@ -38,18 +38,9 @@ class BatteryMonitor: ObservableObject {
         else { return calculateTimeRemaining() == "0:0-1" ? "calculating" : "\(calculateTimeRemaining())" }
     }
 
-    
     init() {
-        info = getBatteryInfo()
-        updateTimer = Timer.publish(
-            every: 5,
-            on: .main,
-            in: .common
-        )
-        .autoconnect()
-        .sink { [weak self] _ in
-            guard let self else {return}
-            
+        self.info = getBatteryInfo()
+        serviceHelper.createTimer {
             if let newInfo = self.getBatteryInfo() {
                 self.info = newInfo
                 self.logBatteryInfo()
@@ -57,6 +48,25 @@ class BatteryMonitor: ObservableObject {
         }
     }
     
+    
+//    init() {
+//        info = getBatteryInfo()
+//        updateTimer = Timer.publish(
+//            every: 5,
+//            on: .main,
+//            in: .common
+//        )
+//        .autoconnect()
+//        .sink { [weak self] _ in
+//            guard let self else {return}
+//            
+//            if let newInfo = self.getBatteryInfo() {
+//                self.info = newInfo
+//                self.logBatteryInfo()
+//            }
+//        }
+//    }
+//    
     
     // update battery level, charging status, time to full charge,
     // time to battery depletion, and battery health
