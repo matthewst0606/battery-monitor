@@ -73,6 +73,7 @@ struct MainApp: App {
                 .frame(minWidth: 300, maxWidth: 500, minHeight: 500, maxHeight: 1000)
                 .preferredColorScheme(colorScheme)
                 .environmentObject(monitor)
+                .environmentObject(modelRunner)
                 .environmentObject(cpu)
                 .environmentObject(mem)
 

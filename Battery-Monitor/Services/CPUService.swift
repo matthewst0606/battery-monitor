@@ -10,22 +10,6 @@ import Foundation
 import Combine
 import SwiftUI
 
-struct RawCPUInfo {
-    let processorCount: UInt32
-    let processorInfo: processor_info_array_t?
-    let processorInfoCount: mach_msg_type_number_t
-}
-
-struct CPUInfo {
-    var activeCores: Double
-    var user: Double
-    var sys: Double
-    var idle: Double
-    var total: Double
-}
-
-
-
 
 class CPUService: ObservableObject {
     @Published var info: CPUInfo?
@@ -47,7 +31,7 @@ class CPUService: ObservableObject {
         }
     }
     
-    
+    // returns the processors name as a string
     func getChipName() -> String {
         var size: size_t = 0
 
@@ -58,43 +42,7 @@ class CPUService: ObservableObject {
         return String(cString: cpu)
     }
     
-    
-    private func logCPUInfo() {
-        do {
-            let url = try appDataDirectory(fileName: "cpu.csv")
-            
-            
-            let formatter = DateFormatter()
-            formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
-            
-            
-            let timestamp = formatter.string(from: Date())
-            let cpuTotal = String(format: "%.2f", info?.total ?? 0)
-            let cpuUser = String(format: "%.2f",info?.user ?? 0)
-            let cpuSystem = String(format: "%.2f",info?.sys ?? 0)
-            let cpuIdle = String(format: "%.2f",info?.idle ?? 0)
-            
-            let row = "\(timestamp), \(cpuTotal), \(cpuUser), \(cpuSystem), \(cpuIdle)\n"
-            
-            if !FileManager.default.fileExists(atPath: url.path) {
-                try? "timestamp, cpuTotal, cpuUser, cpuSystem, cpuIdle\n"
-                    .write(to: url, atomically: true, encoding: .utf8)
-            }
-            
-            if let handle = try? FileHandle(forWritingTo: url) {
-                _ = try? handle.seekToEnd()
-                handle.write(row.data(using: .utf8)!)
-                try? handle.close()
-            }
-        }
-        catch {
-            print("failed to write cpu log!")
-        }
-    }
-    
-    
-    
-    
+
     
     private func GetRawCPUInfo() -> RawCPUInfo? {
         // arguments for host_processor_info
@@ -165,7 +113,7 @@ class CPUService: ObservableObject {
             }
             
             
-            // calculates the change in cpu details
+            // calculates the change in cpu details to update in real time
             let activeDelta = Double((totalUser + totalSys) - (oldUser + oldSys))
             let userDelta = Double((totalUser) - (oldUser))
             let sysDelta = Double((totalSys) - (oldSys))
@@ -191,4 +139,52 @@ class CPUService: ObservableObject {
             )
         }
     }
+    
+    private func logCPUInfo() {
+        do {
+            let url = try appDataDirectory(fileName: "cpu.csv")
+            
+            
+            let formatter = DateFormatter()
+            formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+            
+            
+            let timestamp = formatter.string(from: Date())
+            let cpuTotal = String(format: "%.2f", info?.total ?? 0)
+            let cpuUser = String(format: "%.2f",info?.user ?? 0)
+            let cpuSystem = String(format: "%.2f",info?.sys ?? 0)
+            let cpuIdle = String(format: "%.2f",info?.idle ?? 0)
+            
+            let row = "\(timestamp), \(cpuTotal), \(cpuUser), \(cpuSystem), \(cpuIdle)\n"
+            
+            if !FileManager.default.fileExists(atPath: url.path) {
+                try? "timestamp, cpuTotal, cpuUser, cpuSystem, cpuIdle\n"
+                    .write(to: url, atomically: true, encoding: .utf8)
+            }
+            
+            if let handle = try? FileHandle(forWritingTo: url) {
+                _ = try? handle.seekToEnd()
+                handle.write(row.data(using: .utf8)!)
+                try? handle.close()
+            }
+        }
+        catch {
+            print("failed to write cpu log!")
+        }
+    }
 }
+
+struct RawCPUInfo {
+    let processorCount: UInt32
+    let processorInfo: processor_info_array_t?
+    let processorInfoCount: mach_msg_type_number_t
+}
+
+struct CPUInfo {
+    var activeCores: Double
+    var user: Double
+    var sys: Double
+    var idle: Double
+    var total: Double
+}
+

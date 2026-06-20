@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct ModelTabView: View {
-    @EnvironmentObject var modelRunner: PythonModelRunner
+    @EnvironmentObject var model: PythonModelRunner
     
     
     var body: some View {
@@ -23,7 +23,7 @@ struct ModelTabView: View {
             .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
 
             ScrollView {
-                Text(modelRunner.modelOutput)
+                Text(model.modelOutput)
                     .widgetText()
                     .textSelection(.enabled)
             }

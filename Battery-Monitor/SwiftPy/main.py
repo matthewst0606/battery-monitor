@@ -50,10 +50,6 @@ df = insert_row(
     encoded_battery_info
 )
 
-
-
-
-
 ## selecting device (M series chip) if available
 #if torch.backends.mps.is_available(): device = 'mps'
 #else: device = 'cpu'
@@ -146,10 +142,6 @@ b_model = BatteryModel(device) # initialize the model and optimizer
 print('\n')
 
 
-
-
-
-
 # ***** comment out later for actual app *****
 
 b_model.run_model(x_train, y_train) # running the model
@@ -183,8 +175,6 @@ with torch.no_grad():
     )
 
 
-
-
 features = df[feature_columns].iloc[-1].to_dict()
 prediction = int(current_prediction[0][0])
 
@@ -194,3 +184,4 @@ result = {
 }
 
 print (json.dumps(result))
+sys.exit(0)

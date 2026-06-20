@@ -6,6 +6,7 @@ import AppKit
 
 struct SettingsView: View {
     @EnvironmentObject var monitor: BatteryMonitor
+    @EnvironmentObject var modelRunner: PythonModelRunner
     @EnvironmentObject var cpu: CPUService
 
     @AppStorage("selectedColor") private var selectedColorData: Data = Data()

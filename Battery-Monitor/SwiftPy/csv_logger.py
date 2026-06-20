@@ -1,26 +1,47 @@
+import os
 import pandas as pd
+from pathlib import Path
+
+BASE_DIR = Path(__file__).resolve().parent
+CONFIGURED_DATA_DIR = os.environ.get("BATTERY_MONITOR_DATA_DIR")
+
+if CONFIGURED_DATA_DIR: DATA_DIR = Path(CONFIGURED_DATA_DIR).expanduser()
+else: DATA_DIR = BASE_DIR / "data" if (BASE_DIR / "data").is_dir() else BASE_DIR
+
+DATA_DIR.mkdir(parents=True, exist_ok=True)
+
+def data_file(file_name):
+    preferred = DATA_DIR / file_name
+    if preferred.exists(): return preferred
+
+    for candidate in (BASE_DIR / "data" / file_name, BASE_DIR / file_name):
+        if candidate.exists(): return candidate
+
+    raise FileNotFoundError(f"Could not find {file_name}")
+
 # returns the data from system_info.csv and adds a new row
 # if the device is on battery power
 # -------------------------------------------------
 def insert_row(system_info, process_df, cpu_usage, gpu_df, battery_info, encoded_battery_info):
     # read current data from system_info.csv
-    battery_df = pd.read_csv("data/system_info.csv")
+    battery_df = pd.read_csv(data_file("system_info.csv"))
+    battery_df2 = pd.read_csv(data_file("battery.csv"))
     
-    cpu_df = pd.read_csv("../Services/Data/cpu.csv")
-    memory_df = pd.read_csv("../Services/Data/memory.csv")
     
-
+    
+    cpu_df = pd.read_csv(data_file("cpu.csv"))
+    memory_df = pd.read_csv(data_file("memory.csv"))
+    
     # create a new row when new data is collected
     new_row = {
-        "Battery_Percent": battery_info["battery_percent"],
-        "Time_Remaining": battery_info["time_remaining"],
+        "Battery_Percent": battery_df2[" batteryLevel"].iloc[-1],
+        "Time_Remaining": battery_df2[" timeRemaining"].iloc[-1],
 
         "Battery_Condition": battery_info["battery_condition"],
-        "Maximum_Capacity": battery_info["maximum_capacity"],
+        "Maximum_Capacity": battery_df2[" batteryHealth"].iloc[-1],
         
         "Cycle_Count": battery_info["cycle_count"],
-        "Charging": encoded_battery_info["charging"],
-        "Low_Power_Mode": encoded_battery_info["low_power_mode"],
+        "Low_Power_Mode": battery_df2[" powerMode"].iloc[-1],
 
         "Process_Count": system_info["Process_Count"],
         "Process_Power": round(process_df["POWER"].sum(), 2),
@@ -54,8 +75,7 @@ def insert_row(system_info, process_df, cpu_usage, gpu_df, battery_info, encoded
         
     # adds the new row to the system_info.csv file
     battery_df = pd.concat([battery_df, pd.DataFrame([new_row])], ignore_index=True)
-    battery_df.to_csv("data/system_info.csv", index=False)
-
+    battery_df.to_csv(data_file("system_info.csv"), index=False)
     return battery_df
 
 
@@ -72,7 +92,7 @@ def process_row(process_info):
         rows.append(new_row)
 
         process_df = pd.DataFrame(rows)
-        process_df.to_csv("data/system_processes.csv", index=False)
+        process_df.to_csv(data_file("system_processes.csv"), index=False)
 
     return process_df
 
@@ -93,7 +113,7 @@ def cpu_row(powermetrics_info):
         rows.append(new_row)
 
     powermetrics_df = pd.DataFrame(rows)
-    powermetrics_df.to_csv("data/cpu_usage.csv", index=False)
+    powermetrics_df.to_csv(data_file("cpu_usage.csv"), index=False)
 
     return powermetrics_df
 
@@ -114,6 +134,6 @@ def gpu_row(powermetrics_info):
     rows.append(new_row)
 
     powermetrics_df = pd.DataFrame(rows)
-    powermetrics_df.to_csv("data/gpu_usage.csv", index=False)
+    powermetrics_df.to_csv(data_file("gpu_usage.csv"), index=False)
 
     return powermetrics_df

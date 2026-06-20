@@ -58,24 +58,29 @@ struct WindowView: View {
     
     var ThisMacView: some View {
         VStack {
-            Text("This Mac")
-                .padding(EdgeInsets(top: 2, leading: 0, bottom:  2, trailing: 0))
-                .font(.system(size: 18, weight: .bold))
-            
-            Image(systemName: "macbook.gen2")
-                .padding(EdgeInsets(top: 2, leading: 0, bottom:  2, trailing: 0))
-                .imageScale(.large)
-                .foregroundStyle(Color.primary, Color.dataToColor(from: selectedColorData) ?? selectedAccentColor)
+            HStack {
+                Text("This Mac")
+                    .padding(EdgeInsets(top: 2, leading: 0, bottom:  2, trailing: 0))
+                    .font(.system(size: 18, weight: .bold))
+                
+                Image(systemName: "macbook.gen2")
+                    .padding(EdgeInsets(top: 2, leading: 0, bottom:  2, trailing: 0))
+                    .imageScale(.large)
+                    .foregroundStyle(Color.primary, Color.dataToColor(from: selectedColorData) ?? selectedAccentColor)
+            }
+
 
                 List {
                     ListItem(arg1: "Chip", arg2: "\(cpu.getChipName())", arg3: .primary)
                     ListItem(arg1: "Memory", arg2: "\(Int(mem.info!.total)) GB", arg3: .primary)
                     ListItem(arg1: "Version", arg2: "\(ProcessInfo.processInfo.operatingSystemVersionString)", arg3: .primary)
+                    ListItem(arg1: "System Uptime", arg2: monitor.formatHMS(monitor.info!.uptime), arg3: .primary)
+
                 }
                 .listStyle(.plain)
                 .scrollDisabled(true)
                 .frame(minWidth: 300, maxWidth: 500)
-                .frame(height: 100)
+                .frame(height: 200)
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 5)

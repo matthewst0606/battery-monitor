@@ -36,7 +36,7 @@ struct CustomizeTabView: View {
                     verticalSpacing: 15
                 ) {
                     createColorPicker(
-                        "Accent Color:",
+                        "Accent Color",
                         selection: $colorPickerColor
                     )
                 }
@@ -58,6 +58,8 @@ struct CustomizeTabView: View {
                 .buttonStyle(.glass)
                 .buttonBorderShape(.capsule)
 
+                
+                
                 Button {
                     if let data = colorPickerColor.colorToData() {
                         selectedColorData = data

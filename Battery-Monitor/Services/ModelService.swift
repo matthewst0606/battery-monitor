@@ -9,78 +9,48 @@ import Combine
 import IOKit.ps
 import SwiftUI
 
-class PythonModelRunner: ObservableObject {
-    
-    @Published var modelOutput = ""
-    @Published var timeRemaining: Double = 0.0
-    @Published var batteryPercent: Int = 0
-    @Published var batteryCondition: String = ""
-    @Published var maximumCapacity: Int = 0
-    @Published var cycleCount: Int = 0
-    @Published var totalMemory: Double = 0
-    @Published var usedMemory: Double = 0
-    @Published var numOfProcesses: Int = 0
-    @Published var processPower: Double = 0
-    @Published var processState: Int = 0
-    @Published var CpuUsage: Double = 0.0
-    @Published var CpuFrequency: Double = 0.0
-    @Published var CpuResidency: Double = 0.0
-    @Published var CpuIdle: Double = 0.0
-    @Published var CpuPower: Double = 0.0
-    @Published var GpuUsage: Double = 0.0
-    @Published var GpuFrequency: Double = 0.0
-    @Published var GpuResidency: Double = 0.0
-    @Published var GpuIdle: Double = 0.0
-    @Published var GpuPower: Double = 0.0
 
+class PythonModelRunner: ObservableObject {
+    @AppStorage("selectedPowermetricsInterval") var selectedPowermetricsInterval: PowermetricsInterval = .thirty
+    @Published var modelOutput = ""
+    @Published var result: PythonResult?
+    
     private var pythonTimer: AnyCancellable?
     private var isRunningPython = false
-    
-    
-    
-    
-    
-    
-    struct TimeRemaining: Identifiable {
-        let name: String
-        let prediction: Double
-        let timestamp: Date
-        let id = UUID()
-
-        init(name: String, prediction: Double, hour: Int) {
-            self.name = name
-            self.prediction = prediction
-            let calendar = Calendar.autoupdatingCurrent
-            self.timestamp = calendar.date(from: DateComponents(hour: hour))!
-        }
-    }
-    @Published var outputHistory: [TimeRemaining] = []
+    private let serviceHelper = ServiceHelper()
     
     
     init() {
-        pythonTimer = Timer.publish(every: 120, on: .main, in: .common)
-            .autoconnect()
-            .sink { [weak self] _ in
-                guard let self = self, !self.isRunningPython else { return }
-                self.isRunningPython = true
+        pythonTimer = Timer.publish(
+            every: TimeInterval(selectedPowermetricsInterval.rawValue),
+            on: .main,
+            in: .common
+        )
+        .autoconnect()
+        .sink { [weak self] _ in
+            
+            guard let self = self, !self.isRunningPython else {
+                return
+            }
+            self.isRunningPython = true
+            
+            DispatchQueue.global(qos: .background).async {
+                _ = self.getPy()
                 
-                DispatchQueue.global(qos: .background).async {
-                    _ = self.getPy()
-                    DispatchQueue.main.async { self.isRunningPython = false }
+                DispatchQueue.main.async {
+                    self.isRunningPython = false
                 }
             }
+        }
     }
+    
     
     
     func getPy() -> String {
         let (process, outputPipe, errorPipe) = makePythonProcess()
         
-        do {
-            try process.run()
-        }
-        catch {
-            print("Failed to run Python:", error)
-        }
+        do { try process.run() }
+        catch { print("Failed to run Python:", error) }
         
         let output = String(
             data: outputPipe.fileHandleForReading.readDataToEndOfFile(),
@@ -97,67 +67,15 @@ class PythonModelRunner: ObservableObject {
             return error
         }
         
-        
+
         if let data = output.data(using: .utf8),
            let result = try? JSONDecoder().decode(PythonResult.self, from: data) {
             DispatchQueue.main.async {
-                self.timeRemaining = Double(result.prediction)
-                self.outputHistory.append(
-                    TimeRemaining (
-                        name: "estimatedBattery",
-                        prediction: Double(result.prediction),
-                        hour: Calendar.current.component(.hour, from: Date())
-                    )
-
-                )
-                if self.outputHistory.count > 48 { self.outputHistory.removeFirst() }
-                
-                
-                
-                
-                self.batteryPercent = Int(result.features["Battery_Percent"] ?? 0)
-                
-                let condition = Int(result.features["Battery_Condition"] ?? 0)
-                switch condition {
-                case 0: self.batteryCondition = "Normal"
-                case 1: self.batteryCondition = "Service Recommended"
-                default: self.batteryCondition = "Battery Condition Unknown"
-                }
-                
-                self.maximumCapacity = Int(result.features["Maximum_Capacity"] ?? 0)
-                self.totalMemory = Double(result.features["Total_Memory"] ?? 0)
-                self.usedMemory = Double(result.features["Used_Memory"] ?? 0)
-                self.cycleCount = Int(result.features["Cycle_Count"] ?? 0)
-                self.numOfProcesses = Int(result.features["Process_Count"] ?? 0)
-                
-                self.processPower = Double(result.features["Process_Power"] ?? 0)
-                self.processState = Int(result.features["Process_State"] ?? 0)
-                
-                self.CpuUsage = Double(result.features["CPU_Usage"] ?? 0)
-                self.CpuFrequency = Double(result.features["old_CPU_Frequency"] ?? 0)
-                self.CpuResidency = Double(result.features["old_CPU_Residency"] ?? 0)
-                self.CpuIdle = Double(result.features["CPU_Idle"] ?? 0)
-                self.CpuPower = Double(result.features["old_CPU_Power"] ?? 0)
-
-                self.GpuPower = Double(result.features["GPU_Power"] ?? 0)
-                self.GpuFrequency = Double(result.features["Avg_GPU_Frequency"] ?? 0)
-                self.GpuResidency = Double(result.features["Avg_GPU_Residency"] ?? 0)
-                self.GpuIdle = Double(result.features["Avg_GPU_idle"] ?? 0)
-                self.GpuUsage = Double(100 - self.GpuIdle)
-                
-                self.modelOutput = """
-                    Prediction: \(result.prediction)
-                    Battery: \(Int(result.features["Battery_Percent"] ?? 0))%
-                    CPU Usage: \(result.features["CPU_Usage"] ?? 0)%
-                """
+                self.result = result
+                self.modelOutput = output
             }
         }
         return output
-    }
-    
-    struct PythonResult: Codable {
-        let features: [String: Double]
-        let prediction: Int
     }
     
     private func makePythonProcess() -> (process: Process, outputPipe: Pipe, errorPipe: Pipe) {
@@ -166,7 +84,23 @@ class PythonModelRunner: ObservableObject {
         let errorPipe = Pipe()
         
         process.executableURL = URL(fileURLWithPath: "/usr/bin/python3")
-        let scriptDir = URL(fileURLWithPath: "/Users/matt/Battery-Monitor/Battery-Monitor/SwiftPy")
+        let scriptDir = Bundle.main.resourceURL!
+
+        do {
+            for fileName in ["system_info.csv", "cpu.csv", "memory.csv", "battery.csv"] {
+                let fileURL = try appDataDirectory(fileName: fileName)
+                guard FileManager.default.fileExists(atPath: fileURL.path) else {
+                    throw CocoaError(.fileNoSuchFile)
+                }
+            }
+
+            let dataDirectory = try appDataDirectory()
+            var environment = ProcessInfo.processInfo.environment
+            environment["BATTERY_MONITOR_DATA_DIR"] = dataDirectory.path
+            process.environment = environment
+        } catch {
+            print("Unable to prepare model data directory:", error)
+        }
         
         process.arguments = [scriptDir.appendingPathComponent("main.py").path]
         process.currentDirectoryURL = scriptDir
@@ -177,16 +111,64 @@ class PythonModelRunner: ObservableObject {
     }
     
 
-    
-    
-    
     func updatePy() {
         self.modelOutput = "Loading..."
         DispatchQueue.global(qos: .background).async {
-            let result = self.getPy()
-            DispatchQueue.main.async {
-                self.modelOutput = result
-            }
+            _ = self.getPy()
+            
         }
     }
+    
+    func formatBatteryPrediction(_ value: Double) -> String {
+        let raw = Int(value.rounded())
+        let hours = raw / 60
+        let minutes = raw % 60
+        
+        if hours > 0 { return "\(hours)h \(minutes)m" }
+        else { return "\(minutes)m" }
+    }
+}
+
+
+
+
+
+
+
+struct PythonResult: Codable {
+    let features: [String: Double]
+    let prediction: Int
+    
+    var timeRemaining: Double { Double(prediction) }
+    var batteryPercent: Int { Int(features["Battery_Percent"] ?? 0) }
+    var maximumCapacity: Int { Int(features["Maximum_Capacity"] ?? 0) }
+    var cycleCount: Int { Int(features["Cycle_Count"] ?? 0)}
+    var condition: String {
+        let cond = Int(features["Battery_Condition"] ?? 0)
+        switch cond {
+        case 0: return "Normal"
+        case 1: return "Service Recommended"
+        default: return "Battery Condition Unknown"
+        }
+    }
+    
+    var totalMemory: Double { Double(features["Total_Memory"] ?? 0)}
+    var usedMemory: Double { Double(features["Used_Memory"] ?? 0)}
+    
+    var numOfProcesses: Int { Int(features["Process_Count"] ?? 0) }
+    var processPower: Double{ Double(features["Process_Power"] ?? 0) }
+    var processState: Int{ Int(features["Process_State"] ?? 0) }
+    
+    var CpuUsage: Double { Double(features["CPU_Usage"] ?? 0)}
+    var CpuFrequency: Double{ Double(features["old_CPU_Frequency"] ?? 0)}
+    var CpuResidency: Double{ Double(features["old_CPU_Residency"] ?? 0)}
+    var CpuIdle:Double { Double(features["CPU_Idle"] ?? 0)}
+    var CpuPower:Double{ Double(features["old_CPU_Power"] ?? 0) }
+    
+    var GpuFrequency: Double{ Double(features["Avg_GPU_Frequency"] ?? 0) }
+    var GpuResidency: Double{ Double(features["Avg_GPU_Residency"] ?? 0) }
+    var GpuIdle:Double { Double(features["Avg_GPU_idle"] ?? 0) }
+    var GpuPower:Double{ Double(features["GPU_Power"] ?? 0) }
+    var GpuUsage: Double { Double(100 - self.GpuIdle) }
+
 }

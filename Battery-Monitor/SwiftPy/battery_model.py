@@ -64,17 +64,3 @@ class BatteryModel:
     
 
     
-    
-#    
-#    # --- printing model results ---
-#    def print_results(self)
-#        print('\n')
-#        for guess, actual in zip(predicted_y[:10], actual_y[:10]):
-#            print(f"Predicted: {int(guess.item())} | Actual: {int(actual.item())}")
-#
-#        print(f"Validation Loss: {val_loss.item():.4f}%")
-
-
-
-
-

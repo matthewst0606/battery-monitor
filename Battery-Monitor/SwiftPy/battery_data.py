@@ -21,13 +21,8 @@ class GetBatteryData:
     # ----------------------------------------------------
     def get_system_info(self):
         memory = psutil.virtual_memory()
-        self.system_info['Processor_Model'] = platform.machine()
-        self.system_info[ 'Sys_Date'] = datetime.datetime.now().strftime('%d/%m/%Y')
-        self.system_info['Sys_Time'] = datetime.datetime.now().strftime("%H:%M:%S")
         self.system_info['CPU_Usage'] = psutil.cpu_percent()
         self.system_info['Process_Count'] = len(psutil.pids())
-        self.system_info['Total_Memory'] = round(memory.total / (1024 ** 3), 2)
-        self.system_info['Used_Memory'] = round(memory.used / (1024 ** 3), 2)
         return self.system_info
 
     # gets battery info from the system and add each
@@ -44,12 +39,9 @@ class GetBatteryData:
                 key, value = key.strip(), value.strip()
                 self.battery_dict[key] = value
 
-        battery_percent =  self.battery_dict["State of Charge (%)"]
-        charging_state = self.battery_dict["Charging"]
+
         battery_condition = self.battery_dict["Condition"]
-        maximum_capacity = self.battery_dict["Maximum Capacity"].replace("%", "")
         cycle_count = self.battery_dict["Cycle Count"]
-        low_power_mode = self.battery_dict["Low Power Mode"]
 
         # another command (previous doesnt have time remaining)
         battery_info = subprocess.getoutput("pmset -g batt")
@@ -61,15 +53,9 @@ class GetBatteryData:
         # wait for the system to calculate the estimated remaining time
         if time_remaining == "(no": return None
 
-
         # return a dictionary
         return {
-            "battery_percent": int(battery_percent),
-            "time_remaining": int(time_remaining),
-            "maximum_capacity": int(maximum_capacity),
             "cycle_count": int(cycle_count),
-            "charging_state": charging_state,
-            "low_power_mode": low_power_mode,
             "battery_condition": battery_condition,
         }
 
@@ -109,7 +95,6 @@ class GetBatteryData:
                 }
         return process_dict
     
-
 
     def get_powermetrics_info(self):
         powermetrics = subprocess.getoutput("" \

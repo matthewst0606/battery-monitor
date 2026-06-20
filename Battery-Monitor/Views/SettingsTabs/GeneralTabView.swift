@@ -50,6 +50,7 @@ enum PowermetricsInterval: Int, CaseIterable, Identifiable {
 // creates the elements of the general tab in settings
 struct GeneralTabView: View {
     @EnvironmentObject var monitor: BatteryMonitor
+    @EnvironmentObject var modelRunner: PythonModelRunner
     @EnvironmentObject var cpu: CPUService
     @EnvironmentObject var mem: MemoryService
     
@@ -90,7 +91,6 @@ struct GeneralTabView: View {
                     ForEach(PowermetricsInterval.allCases) { interval in
                         Text(interval.label).tag(interval)
                     }
-                    
                 }.padding()
                 
                 Toggle("Show in Menubar", isOn: $menuBarBattery)
@@ -125,6 +125,9 @@ struct GeneralTabView: View {
                 mem.info = mem.getMemoryInfo()
                 monitor.info = monitor.getBatteryInfo()
             }
+        }
+        .onChange(of: selectedPowermetricsInterval) {
+            modelRunner.updatePy()
         }
     }
     

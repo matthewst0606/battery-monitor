@@ -4,4 +4,4 @@
 .vscode/
 .build/
 Battery-Monitor.xcodeproj/
-Battery-Monitor/Services/Data/*.csv
+Battery-Monitor/SwiftPy/Data/*.csv

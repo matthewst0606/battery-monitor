@@ -8,17 +8,19 @@ import SwiftUI
 
 struct CPUPowermetricsView: View {
     @EnvironmentObject var cpu: CPUService
-    @EnvironmentObject var modelRunner: PythonModelRunner
+    @EnvironmentObject var model: PythonModelRunner
     
     var body: some View {
         
         VStack(spacing: 5) {
             List {
-                ListItem(arg1: "CPU Usage", arg2: String(format: "%.2f%%", modelRunner.CpuUsage), arg3: .primary)
-                ListItem(arg1: "CPU Idle", arg2: String(format: "%.2f%%", modelRunner.CpuIdle), arg3: .primary)
-                ListItem(arg1: "CPU Power", arg2: String(format: "%.2f W", modelRunner.CpuPower), arg3: .primary)
-                ListItem(arg1: "CPU Frequency", arg2: String(format: "%.2f Mhz", modelRunner.CpuFrequency), arg3: .primary)
-                ListItem(arg1: "CPU Residency", arg2: String(format: "%.2f%%", modelRunner.CpuResidency), arg3: .primary)
+                if let result = model.result {
+                    ListItem(arg1: "CPU Usage", arg2: String(format: "%.2f%%", result.CpuUsage), arg3: .primary)
+                    ListItem(arg1: "CPU Idle", arg2: String(format: "%.2f%%", result.CpuIdle), arg3: .primary)
+                    ListItem(arg1: "CPU Power", arg2: String(format: "%.2f W", result.CpuPower), arg3: .primary)
+                    ListItem(arg1: "CPU Frequency", arg2: String(format: "%.2f Mhz", result.CpuFrequency), arg3: .primary)
+                    ListItem(arg1: "CPU Residency", arg2: String(format: "%.2f%%", result.CpuResidency), arg3: .primary)
+                }
             }.unscrollableListStyle()
         }.appTabStyle()
     }

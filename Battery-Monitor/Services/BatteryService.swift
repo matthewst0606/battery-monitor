@@ -14,15 +14,6 @@ import AppKit
 import MachO
 
 
-struct BatteryInfo {
-    var batteryLevel: Int
-    var timeRemaining: Double
-    var timeToFullBattery: Double
-    var isCharging: Bool
-    var batteryHealth: Int
-}
-
-
 class BatteryMonitor: ObservableObject {
     @Published var info: BatteryInfo?
     private let serviceHelper = ServiceHelper()
@@ -49,25 +40,6 @@ class BatteryMonitor: ObservableObject {
     }
     
     
-//    init() {
-//        info = getBatteryInfo()
-//        updateTimer = Timer.publish(
-//            every: 5,
-//            on: .main,
-//            in: .common
-//        )
-//        .autoconnect()
-//        .sink { [weak self] _ in
-//            guard let self else {return}
-//            
-//            if let newInfo = self.getBatteryInfo() {
-//                self.info = newInfo
-//                self.logBatteryInfo()
-//            }
-//        }
-//    }
-//    
-    
     // update battery level, charging status, time to full charge,
     // time to battery depletion, and battery health
     func getBatteryInfo() -> BatteryInfo? {
@@ -76,10 +48,26 @@ class BatteryMonitor: ObservableObject {
     
         
         var batteryLevel: Int = 0
-        var timeRemaining: Double = 0.0
-        var timeToFullBattery: Double = 0.0
+        var timeRemaining: Double = 0
+        var timeToFullBattery: Double = 0
         var isCharging: Bool = false
         var batteryHealth: Int = 0
+        var batteryCondition: Int = 0
+        var powerMode: Int = 0
+        
+        
+        
+
+        let uptime = ProcessInfo.processInfo.systemUptime
+
+        switch ProcessInfo.processInfo.isLowPowerModeEnabled {
+        case true: powerMode = 1
+        default: powerMode = 0
+        }
+        
+        
+
+
         
         for source in sources {
             let info = IOPSGetPowerSourceDescription(snapshot, source)
@@ -102,6 +90,23 @@ class BatteryMonitor: ObservableObject {
             
             if let health = info[kIOPSMaxCapacityKey] as? Int
                 { batteryHealth = health }
+            
+            
+            if let condition = info[kIOPSBatteryHealthConditionKey] as? String,
+               !condition.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                
+                switch condition {
+                case kIOPSGoodValue:
+                    batteryCondition = 1
+                case kIOPSFairValue:
+                    batteryCondition = 2
+                case kIOPSPoorValue:
+                    batteryCondition = 3
+                default:
+                    batteryCondition = 0
+                }
+            }
+
         }
         
         
@@ -112,6 +117,10 @@ class BatteryMonitor: ObservableObject {
             timeToFullBattery: timeToFullBattery,
             isCharging: isCharging,
             batteryHealth: batteryHealth,
+            batteryCondition: batteryCondition,
+
+            powerMode: powerMode,
+            uptime: uptime
         )
     }
     
@@ -120,10 +129,9 @@ class BatteryMonitor: ObservableObject {
     private func logBatteryInfo() {
         guard let info = info else { return }
         
-        
         do {
             let url = try appDataDirectory(fileName: "battery.csv")
-            
+
             
             let formatter = DateFormatter()
             formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
@@ -133,8 +141,11 @@ class BatteryMonitor: ObservableObject {
             let timeRemaining = String(format: "%.0f",info.timeRemaining)
             let isCharging = String(info.isCharging ? 1 : 0)
             let batteryHealth = String(info.batteryHealth)
+            let batteryCondition = String(info.batteryCondition)
+
+            let powerMode = String(info.powerMode)
             
-            let row = "\(timestamp), \(batteryLevel), \(timeRemaining), \(isCharging), \(batteryHealth)\n"
+            let row = "\(timestamp), \(batteryLevel), \(batteryHealth), \(batteryCondition), \(timeRemaining), \(powerMode), \(isCharging)\n"
             
             if !FileManager.default.fileExists(atPath: url.path) {
                 try? row.write(to: url, atomically: true, encoding: .utf8)
@@ -146,9 +157,10 @@ class BatteryMonitor: ObservableObject {
                 try? handle.close()
             }
         }
+        
+        
         catch {
             print("failed to write battery log!")
-
         }
     }
     
@@ -168,6 +180,23 @@ class BatteryMonitor: ObservableObject {
             default:       return "battery.100percent"
         }
     }
+    
+    
+
+    
+    
+    func formatHMS(_ interval: TimeInterval) -> String {
+        let totalSeconds = Int(interval)
+        
+        let hours = totalSeconds / 3600
+        let minutes = (totalSeconds % 3600) / 60
+        let seconds = totalSeconds % 60
+        
+        return String(format: "%02d:%02d:%02d", hours, minutes, seconds)
+    }
+    
+
+    
 
     // format: N hours:N minutes
     func calculateTimeRemaining() -> String {
@@ -205,15 +234,21 @@ class BatteryMonitor: ObservableObject {
     func calculateTimeToFullBattery() -> String {
         let timeToFull = info?.timeToFullBattery ?? 0
 
-        
         let hours = Int(timeToFull/60)
         let minutes = Int(timeToFull.truncatingRemainder(dividingBy: 60))
 
         let remain = "\(hours):\(minutes < 10 ? "0\(minutes)" : "\(minutes)")"
         return remain;
     }
-    
-    
-    
+}
 
+struct BatteryInfo {
+    var batteryLevel: Int
+    var timeRemaining: Double
+    var timeToFullBattery: Double
+    var isCharging: Bool
+    var batteryHealth: Int
+    var batteryCondition: Int
+    var powerMode: Int
+    var uptime: TimeInterval
 }

@@ -10,22 +10,12 @@ import Combine
 import MachO
 import Darwin
 
-
-
-struct MemoryInfo {
-    var total: Double
-    var used: Double
-    var available: Double
-    var cached: Double
-}
-
 class MemoryService: ObservableObject {
     @Published var info: MemoryInfo?
-    private var phyMemory = ProcessInfo.processInfo.physicalMemory
     
+    private var phyMemory = ProcessInfo.processInfo.physicalMemory
     private let serviceHelper = ServiceHelper()
 
-    
     
     init() {
         self.info = getMemoryInfo()
@@ -89,7 +79,7 @@ class MemoryService: ObservableObject {
     private func logMemoryInfo() {
         do {
             let url = try appDataDirectory(fileName: "memory.csv")
-            
+
             let formatter = DateFormatter()
             formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
             let timestamp = formatter.string(from: Date())
@@ -117,4 +107,12 @@ class MemoryService: ObservableObject {
             print("failed to write memory log!")
         }
     }
+}
+
+
+struct MemoryInfo {
+    var total: Double
+    var used: Double
+    var available: Double
+    var cached: Double
 }
