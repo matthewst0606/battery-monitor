@@ -14,7 +14,6 @@ enum ShowInMenuBar: String, CaseIterable, Identifiable {
 }
 
 struct CustomizeTabView: View {
-    @EnvironmentObject var monitor: BatteryMonitor
     @EnvironmentObject var cpu: CPUService
     
     @AppStorage("selectedColor") private var selectedColorData: Data = Data()

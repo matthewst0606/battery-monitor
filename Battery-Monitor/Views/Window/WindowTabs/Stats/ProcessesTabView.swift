@@ -23,3 +23,21 @@ struct ProcessesTabView: View {
         }.appTabStyle()
     }
 }
+
+
+struct ProcessTabView: View {
+    @EnvironmentObject var process: ProcessService
+
+    var body: some View {
+        VStack(spacing: 5) {
+            List(process.processes) { p in
+                HStack {
+                    Text(p.command)
+                    Spacer()
+                    Text(p.power)
+                }
+            }
+            
+        }.appTabStyle()
+    }
+}

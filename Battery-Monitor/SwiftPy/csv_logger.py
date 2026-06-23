@@ -113,11 +113,6 @@ def process_row(process_info):
 
 
 
-
-
-
-
-
 # creates the data in data/cpu_usage
 def cpu_row(powermetrics_info):
     rows = []
@@ -138,6 +133,8 @@ def cpu_row(powermetrics_info):
     powermetrics_df.to_csv(data_file("cpu_usage.csv"), index=False)
 
     return powermetrics_df
+
+
 
 # creates the data in data/gpu_usage
 def gpu_row(powermetrics_info):

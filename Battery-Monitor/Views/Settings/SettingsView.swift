@@ -2,13 +2,7 @@ import SwiftUI
 import AppKit
 
 struct SettingsView: View {
-    @EnvironmentObject var monitor: BatteryMonitor
-    @EnvironmentObject var model: ModelService
-    @EnvironmentObject var cpu: CPUService
-
     @AppStorage("selectedColor") private var selectedColorData: Data = Data()
-    
-    
     @State private var colorPickerColor: Color = .blue
     @State private var selectedTab = "general"
 
@@ -34,9 +28,10 @@ struct SettingsView: View {
                     default: GeneralTab
                     }
                     
-                    
-                    settingsButton("Quit App") { NSApp.terminate(nil) }
-
+                    HStack {
+                        settingsButton("Clear Data") { NSApp.terminate(nil) }
+                        settingsButton("Quit App") { NSApp.terminate(nil) }
+                    }
                 }
                 .windowTabStyle(title: "Settings")
             

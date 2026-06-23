@@ -12,7 +12,7 @@ import SwiftUI
 import IOKit.ps
 
 struct MenuBarView: View {
-    @EnvironmentObject var monitor: BatteryMonitor
+    @EnvironmentObject var battery: BatteryService
     @AppStorage("selectedColor") private var selectedColorData: Data = Data()
     @State private var selectedAccentColor: Color = .accentColor
     
@@ -21,7 +21,7 @@ struct MenuBarView: View {
     
     private var batteryIconView: some View {
         ZStack {
-            Image(systemName: "\(monitor.batteryIcon)")
+            Image(systemName: "\(battery.batteryIcon)")
                 .font(.system(size: 30, weight: .light))
                 .imageScale(.medium)
                 .symbolRenderingMode(.palette)
@@ -29,7 +29,7 @@ struct MenuBarView: View {
                     Color.dataToColor(from: selectedColorData) ?? selectedAccentColor,
                     Color.primary
                 )
-            Text("\(monitor.info?.batteryLevel ?? 0)%")
+            Text("\(battery.info?.batteryLevel ?? 0)%")
                 .offset(x: -1.5)
                 .font(.system(size: 12, weight: .bold))
                 .foregroundStyle(.white)
@@ -46,8 +46,8 @@ struct MenuBarView: View {
 
             // display time remaining and battery health
             GroupBox {
-                Text("Time Remaining: \(monitor.timeRemainingText)").widgetText()
-                Text("Battery Health: \(monitor.info?.batteryHealth ?? 0)").widgetText()
+                Text("Time Remaining: \(battery.timeRemainingText)").widgetText()
+                Text("Battery Health: \(battery.info?.batteryHealth ?? 0)").widgetText()
             }
             
             HStack {

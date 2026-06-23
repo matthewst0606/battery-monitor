@@ -21,6 +21,8 @@ class CPUService: ObservableObject {
     private let serviceHelper = ServiceHelper()
 
     
+
+    
     init() {
         self.info = getProcessorInfo()
         serviceHelper.createTimer {

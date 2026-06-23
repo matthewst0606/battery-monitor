@@ -4,10 +4,12 @@ import AppKit
 
 @main
 struct MainApp: App {
-    @StateObject private var monitor = BatteryMonitor()
+    @StateObject private var battery = BatteryService()
     @StateObject private var model = ModelService()
-    @StateObject var mem =  MemoryService()
+    @StateObject private var mem =  MemoryService()
     @StateObject private var cpu = CPUService()
+    @StateObject private var process = ProcessService()
+
     
     @State private var settings = SettingsView()
     @AppStorage("selectedColor") private var selectedColorData: Data = Data()
@@ -26,6 +28,7 @@ struct MainApp: App {
         }
     }
     
+    
 
     var body: some Scene {
         WindowGroup("Battery Monitor", id: "main") {
@@ -33,10 +36,11 @@ struct MainApp: App {
                 .frame(minWidth: 550, idealWidth: 550, maxWidth: 550)
                 .frame(minHeight: 700, idealHeight: 700, maxHeight: 700)
                 .preferredColorScheme(colorScheme)
-                .environmentObject(monitor)
+                .environmentObject(battery)
                 .environmentObject(model)
                 .environmentObject(cpu)
                 .environmentObject(mem)
+                .environmentObject(process)
         }
         .defaultSize(width: 550, height: 700)
         .windowResizability(.contentSize)
@@ -46,29 +50,30 @@ struct MainApp: App {
             MenuBarView()
                 .background(.clear.opacity(0.2))
                 .preferredColorScheme(colorScheme)
-                .environmentObject(monitor)
+                .environmentObject(battery)
         }
         label: {
             HStack {
-                Image(systemName: monitor.batteryIcon)
+                Image(systemName: battery.batteryIcon)
                     .font(.system(size: 16, weight: .medium))
                     .symbolRenderingMode(.palette)
                     .foregroundStyle(
                         Color.dataToColor(from: selectedColorData) ?? selectedAccentColor,
                         Color.primary
                     )
+                
                 if selectedFormat == .regular {
                     switch inMenuBar {
                     case .timeRemaining:
-                        Text("\(monitor.calculateTimeRemainingCompact())")
+                        Text("\(battery.calculateTimeRemainingCompact())")
                             .font(.system(size: 10, weight: .thin,))
                             .foregroundStyle(.white)
                     case .batteryPercent:
-                        Text("\(monitor.info?.batteryLevel ?? 0)%")
+                        Text("\(battery.info?.batteryLevel ?? 0)%")
                             .font(.system(size: 10, weight: .thin,))
                             .foregroundStyle(.white)
                     case .cycleCount:
-                        Text("\(monitor.info?.cycleCount ?? 0)")
+                        Text("\(battery.info?.cycleCount ?? 0)")
                             .font(.system(size: 10, weight: .thin,))
                             .foregroundStyle(.white)
                     }
@@ -85,7 +90,7 @@ struct MainApp: App {
             SettingsView()
                 .frame(minWidth: 550, maxWidth: 550, minHeight: 550, maxHeight: 550)
                 .preferredColorScheme(colorScheme)
-                .environmentObject(monitor)
+                .environmentObject(battery)
                 .environmentObject(model)
                 .environmentObject(cpu)
                 .environmentObject(mem)

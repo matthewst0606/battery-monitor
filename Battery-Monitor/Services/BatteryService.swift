@@ -1,5 +1,5 @@
 //
-//  batteryMonitor.swift
+//  batteryService.swift
 //  app
 //
 //  Created by Matt on 5/29/26.
@@ -15,9 +15,15 @@ import AppKit
 import MachO
 import CoreGraphics
 
-class BatteryMonitor: ObservableObject {
+class BatteryService: ObservableObject {
     @Published var info: BatteryInfo?
     private let serviceHelper = ServiceHelper()
+    
+
+    
+    
+    
+    
     
     // returns a string that displays how long it will take until
     // battery is dead or fully charged
@@ -38,6 +44,10 @@ class BatteryMonitor: ObservableObject {
             }
         }
     }
+    
+    
+    
+    
     
     
     private func getSmartBatteryInfo(_ key: String) -> Int {
@@ -83,27 +93,6 @@ class BatteryMonitor: ObservableObject {
     
     
     
-    
-    
-    
-//    private func getDevicePowerState() -> Double {
-//        let service = IOServiceGetMatchingService(
-//            kIOMainPortDefault,
-//            IOServiceMatching("AppleMultiFunctionManager")
-//        )
-//        guard service != 0 else { return -1 }
-//        defer { IOObjectRelease(service) }
-//        
-//        let pm = IORegistryEntryCreateCFProperty(
-//            service,
-//            "IOPowerManagement" as CFString,
-//            kCFAllocatorDefault,
-//            0
-//        )?.takeRetainedValue() as? [String: Any]
-//        
-//        return pm?["CurrentPowerState"] as?  ?? -1
-//    }
-    
 
     // update battery level, charging status, time to full charge,
     // time to battery depletion, and battery health
@@ -131,7 +120,6 @@ class BatteryMonitor: ObservableObject {
         let cycleCount = getSmartBatteryInfo(kIOPMPSCycleCountKey)
         let temperature = Double(getSmartBatteryInfo(kIOPMPSBatteryTemperatureKey)) / 100.0
         
-
         
         for source in sources {
             let info = IOPSGetPowerSourceDescription(snapshot, source)

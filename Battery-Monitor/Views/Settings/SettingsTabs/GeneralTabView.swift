@@ -8,7 +8,7 @@ import SwiftUI
 
 // creates the elements of the general tab in settings
 struct GeneralTabView: View {
-    @EnvironmentObject var monitor: BatteryMonitor
+    @EnvironmentObject var battery: BatteryService
     @EnvironmentObject var model: ModelService
     @EnvironmentObject var cpu: CPUService
     @EnvironmentObject var mem: MemoryService
@@ -57,7 +57,7 @@ struct GeneralTabView: View {
             serviceHelper.createTimer {
                 cpu.info = cpu.getProcessorInfo()
                 mem.info = mem.getMemoryInfo()
-                monitor.info = monitor.getBatteryInfo()
+                battery.info = battery.getBatteryInfo()
             }
         }
         .onChange(of: selectedPowermetricsInterval) {
