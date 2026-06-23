@@ -242,7 +242,6 @@ class BatteryMonitor: ObservableObject {
     
     func formatHMS(_ interval: TimeInterval) -> String {
         let totalSeconds = Int(interval)
-        
         let hours = totalSeconds / 3600
         let minutes = (totalSeconds % 3600) / 60
         let seconds = totalSeconds % 60

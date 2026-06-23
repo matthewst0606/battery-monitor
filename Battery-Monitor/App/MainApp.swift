@@ -16,6 +16,7 @@ struct MainApp: App {
     @AppStorage("selectedMode") var selectedMode: Mode = .system
     @AppStorage("selectedFormat") var selectedFormat: menubarFormat = .regular
     @AppStorage("menuBarBattery") private var menuBarBattery = true
+    @AppStorage("inMenuBar") var inMenuBar: ShowInMenuBar = .timeRemaining
 
     private var colorScheme: ColorScheme? {
         switch selectedMode {
@@ -57,9 +58,21 @@ struct MainApp: App {
                         Color.primary
                     )
                 if selectedFormat == .regular {
-                    Text("\(monitor.calculateTimeRemainingCompact())")
-                        .font(.system(size: 10, weight: .thin,))
-                        .foregroundStyle(.white)
+                    switch inMenuBar {
+                    case .timeRemaining:
+                        Text("\(monitor.calculateTimeRemainingCompact())")
+                            .font(.system(size: 10, weight: .thin,))
+                            .foregroundStyle(.white)
+                    case .batteryPercent:
+                        Text("\(monitor.info?.batteryLevel ?? 0)%")
+                            .font(.system(size: 10, weight: .thin,))
+                            .foregroundStyle(.white)
+                    case .cycleCount:
+                        Text("\(monitor.info?.cycleCount ?? 0)")
+                            .font(.system(size: 10, weight: .thin,))
+                            .foregroundStyle(.white)
+                    }
+
                 }
             }
         }
@@ -70,7 +83,7 @@ struct MainApp: App {
         #if os(macOS)
         Settings {
             SettingsView()
-                .frame(minWidth: 300, maxWidth: 500, minHeight: 500, maxHeight: 1000)
+                .frame(minWidth: 550, maxWidth: 550, minHeight: 550, maxHeight: 550)
                 .preferredColorScheme(colorScheme)
                 .environmentObject(monitor)
                 .environmentObject(model)

@@ -121,3 +121,17 @@ extension View {
     }
 }
 
+// settings
+extension View {
+    func settingsButton(_ buttonLabel: String, action: @escaping () -> Void) -> some View {
+        Button { action() }
+        label: {
+                Text(buttonLabel)
+                    .padding(.vertical, 2)
+                    .padding(.horizontal, 5)
+        }
+        .buttonStyle(.glass)
+        .buttonBorderShape(.capsule)
+        
+    }
+}
