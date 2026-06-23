@@ -12,7 +12,7 @@ import Darwin
 
 struct WindowView: View {
     @EnvironmentObject var monitor: BatteryMonitor
-    @EnvironmentObject var modelRunner: PythonModelRunner
+    @EnvironmentObject var model: ModelService
     @EnvironmentObject var cpu: CPUService
     @EnvironmentObject var mem: MemoryService
 
@@ -22,6 +22,8 @@ struct WindowView: View {
         CPUTabView()
             .environmentObject(cpu)
     }
+    
+    
 
     private var MemoryTab: some View {
         MemoryTabView()
@@ -31,19 +33,20 @@ struct WindowView: View {
     private var batteryTab: some View {
         BatteryTabView()
             .environmentObject(monitor)
+
     }
     
     private var PowermetricsTab: some View {
         PowermetricsTabView()
             .environmentObject(mem)
             .environmentObject(cpu)
-            .environmentObject(modelRunner)
+            .environmentObject(model)
     }
 
 
     private var ModelTab: some View {
         ModelTabView()
-            .environmentObject(modelRunner)
+            .environmentObject(model)
     }
     
     
@@ -129,10 +132,11 @@ struct WindowView: View {
             
             Tab("Other", systemImage: "info.circle.fill") { }
         }
-        .tabViewStyle(.sidebarAdaptable)
-        .background(.thickMaterial)
+        .background(.ultraThinMaterial)
         .onAppear() {
-            modelRunner.updatePy()
+            if !model.isRunningPython {
+                model.updatePy()
+            }
         }
 
     }

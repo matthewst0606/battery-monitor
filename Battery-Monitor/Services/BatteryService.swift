@@ -8,16 +8,16 @@
 import Foundation
 import Combine
 import IOKit.ps
+import IOKit.pwr_mgt
 import IOKit.graphics
 import SwiftUI
 import AppKit
 import MachO
-
+import CoreGraphics
 
 class BatteryMonitor: ObservableObject {
     @Published var info: BatteryInfo?
     private let serviceHelper = ServiceHelper()
-
     
     // returns a string that displays how long it will take until
     // battery is dead or fully charged
@@ -40,24 +40,86 @@ class BatteryMonitor: ObservableObject {
     }
     
     
+    private func getSmartBatteryInfo(_ key: String) -> Int {
+        let service = IOServiceGetMatchingService(
+            kIOMainPortDefault,
+            IOServiceMatching("AppleSmartBattery")
+        )
+
+        guard service != 0 else { return -1 }
+        defer { IOObjectRelease(service) }
+
+        
+        let value = IORegistryEntryCreateCFProperty(
+            service,
+            key as CFString,
+            kCFAllocatorDefault,
+            0
+        )?.takeRetainedValue() as? NSNumber
+    
+        return value?.intValue ?? 0
+    }
+    
+    
+    private func getOther(_ key: String) -> String {
+        let service = IOServiceGetMatchingService(
+            kIOMainPortDefault,
+            IOServiceMatching("IOPowerManagement")
+        )
+
+        guard service != 0 else { return "nil" }
+        defer { IOObjectRelease(service) }
+
+        
+        let value = IORegistryEntryCreateCFProperty(
+            service,
+            key as CFString,
+            kCFAllocatorDefault,
+            0
+        )?.takeRetainedValue() as? NSNumber
+    
+        return value?.stringValue ?? "nil"
+    }
+    
+    
+    
+    
+    
+    
+//    private func getDevicePowerState() -> Double {
+//        let service = IOServiceGetMatchingService(
+//            kIOMainPortDefault,
+//            IOServiceMatching("AppleMultiFunctionManager")
+//        )
+//        guard service != 0 else { return -1 }
+//        defer { IOObjectRelease(service) }
+//        
+//        let pm = IORegistryEntryCreateCFProperty(
+//            service,
+//            "IOPowerManagement" as CFString,
+//            kCFAllocatorDefault,
+//            0
+//        )?.takeRetainedValue() as? [String: Any]
+//        
+//        return pm?["CurrentPowerState"] as?  ?? -1
+//    }
+    
+
     // update battery level, charging status, time to full charge,
     // time to battery depletion, and battery health
     func getBatteryInfo() -> BatteryInfo? {
         let snapshot = IOPSCopyPowerSourcesInfo().takeRetainedValue()
         let sources = IOPSCopyPowerSourcesList(snapshot).takeRetainedValue() as Array
-    
         
         var batteryLevel: Int = 0
         var timeRemaining: Double = 0
         var timeToFullBattery: Double = 0
         var isCharging: Bool = false
         var batteryHealth: Int = 0
-        var batteryCondition: Int = 0
+        var batteryCondition: String = ""
         var powerMode: Int = 0
+        var powerSourceState: String = ""
         
-        
-        
-
         let uptime = ProcessInfo.processInfo.systemUptime
 
         switch ProcessInfo.processInfo.isLowPowerModeEnabled {
@@ -66,7 +128,9 @@ class BatteryMonitor: ObservableObject {
         }
         
         
-
+        let cycleCount = getSmartBatteryInfo(kIOPMPSCycleCountKey)
+        let temperature = Double(getSmartBatteryInfo(kIOPMPSBatteryTemperatureKey)) / 100.0
+        
 
         
         for source in sources {
@@ -74,42 +138,34 @@ class BatteryMonitor: ObservableObject {
                 .takeUnretainedValue() as! [String: Any]
    
             // battery level
-            if let level = info[kIOPSCurrentCapacityKey] as? Int
-                { batteryLevel = level }
+            if let currentLevel = info[kIOPSCurrentCapacityKey] as? Int
+                { batteryLevel = currentLevel }
             
             // is device charging
-            if let charging = info[kIOPSIsChargingKey] as? Bool
-                { isCharging = charging }
+            if let chargingStatus = info[kIOPSIsChargingKey] as? Bool
+                { isCharging = chargingStatus }
             
+            // estimated time to charge
             if let timeToCharge = info[kIOPSTimeToFullChargeKey] as? Double
                 { timeToFullBattery = timeToCharge }
             
             // estimated time remaining
-            if let remaining = info[kIOPSTimeToEmptyKey] as? Double
-                { timeRemaining = remaining }
+            if let currentTimeRemaining = info[kIOPSTimeToEmptyKey] as? Double
+                { timeRemaining = currentTimeRemaining }
             
-            if let health = info[kIOPSMaxCapacityKey] as? Int
-                { batteryHealth = health }
+            // current battery health
+            if let currentHealth = info[kIOPSMaxCapacityKey] as? Int
+                { batteryHealth = currentHealth }
+            
+            // current power source state
+            if let currentPowerSourceState = info[kIOPSPowerSourceStateKey] as? String
+                { powerSourceState = currentPowerSourceState }
             
             
-            if let condition = info[kIOPSBatteryHealthConditionKey] as? String,
-               !condition.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                
-                switch condition {
-                case kIOPSGoodValue:
-                    batteryCondition = 1
-                case kIOPSFairValue:
-                    batteryCondition = 2
-                case kIOPSPoorValue:
-                    batteryCondition = 3
-                default:
-                    batteryCondition = 0
-                }
-            }
+            if let condition = info[kIOPSBatteryHealthKey] as? String
+                { batteryCondition = condition }
 
         }
-        
-        
         
         return BatteryInfo (
             batteryLevel: batteryLevel,
@@ -118,16 +174,19 @@ class BatteryMonitor: ObservableObject {
             isCharging: isCharging,
             batteryHealth: batteryHealth,
             batteryCondition: batteryCondition,
-
             powerMode: powerMode,
-            uptime: uptime
+            uptime: uptime,
+            powerSourceState: powerSourceState,
+            cycleCount: cycleCount,
+            temperature: temperature
         )
     }
     
     
     
     private func logBatteryInfo() {
-        guard let info = info else { return }
+        guard let info = info
+        else { return }
         
         do {
             let url = try appDataDirectory(fileName: "battery.csv")
@@ -139,14 +198,14 @@ class BatteryMonitor: ObservableObject {
             let timestamp = formatter.string(from: Date())
             let batteryLevel = String(info.batteryLevel)
             let timeRemaining = String(format: "%.0f",info.timeRemaining)
+            let cycleCount = String(info.cycleCount)
             let isCharging = String(info.isCharging ? 1 : 0)
             let batteryHealth = String(info.batteryHealth)
             let batteryCondition = String(info.batteryCondition)
-
             let powerMode = String(info.powerMode)
+            let temperature = String(info.temperature)
             
-            let row = "\(timestamp), \(batteryLevel), \(batteryHealth), \(batteryCondition), \(timeRemaining), \(powerMode), \(isCharging)\n"
-            
+            let row = "\(timestamp), \(batteryLevel), \(batteryHealth), \(batteryCondition), \(timeRemaining), \(powerMode), \(isCharging), \(cycleCount), \(temperature)\n"
             if !FileManager.default.fileExists(atPath: url.path) {
                 try? row.write(to: url, atomically: true, encoding: .utf8)
             }
@@ -157,11 +216,7 @@ class BatteryMonitor: ObservableObject {
                 try? handle.close()
             }
         }
-        
-        
-        catch {
-            print("failed to write battery log!")
-        }
+        catch { print("failed to write battery log!") }
     }
     
     
@@ -248,7 +303,11 @@ struct BatteryInfo {
     var timeToFullBattery: Double
     var isCharging: Bool
     var batteryHealth: Int
-    var batteryCondition: Int
+    var batteryCondition: String
     var powerMode: Int
     var uptime: TimeInterval
+    var powerSourceState: String
+    var cycleCount: Int
+    var temperature: Double
+    
 }

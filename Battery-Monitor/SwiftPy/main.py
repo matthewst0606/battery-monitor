@@ -1,21 +1,15 @@
 import sys
 import numpy as np
 import torch
-import joblib
 import json
 from sklearn.preprocessing import StandardScaler
 from battery_data import GetBatteryData
-from encoder import encode
 from csv_logger import insert_row, process_row, gpu_row, cpu_row
 from battery_model import BatteryModel
 
 
 data = GetBatteryData()
 system_info = data.system_info
-battery_info = data.battery_dict
-if battery_info == None:
-    print("Error occured: battery_info is missing...")
-    sys.exit()
 
 
 process_info = data.process_dict
@@ -30,10 +24,6 @@ if powermetrics_info == None:
     sys.exit()
 
 
-encoded_battery_info = encode(battery_info)
-if encoded_battery_info == None:
-    print("Error occured: encoded_battery_info is missing...")
-    sys.exit()
 
 
 # access the dataframe
@@ -46,15 +36,11 @@ df = insert_row(
     process_df,
     cpu_usage,
     gpu_df,
-    battery_info,
-    encoded_battery_info
 )
 
 ## selecting device (M series chip) if available
 #if torch.backends.mps.is_available(): device = 'mps'
 #else: device = 'cpu'
-
-
 #changed to cpu (better for battery)
 # might add user preference later...
 device = 'cpu'
@@ -139,7 +125,6 @@ y_val = target_data[validation_idx]
 # using the model
 # --------------------------------------------------
 b_model = BatteryModel(device) # initialize the model and optimizer
-print('\n')
 
 
 # ***** comment out later for actual app *****

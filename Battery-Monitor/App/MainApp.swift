@@ -5,7 +5,7 @@ import AppKit
 @main
 struct MainApp: App {
     @StateObject private var monitor = BatteryMonitor()
-    @StateObject private var modelRunner = PythonModelRunner()
+    @StateObject private var model = ModelService()
     @StateObject var mem =  MemoryService()
     @StateObject private var cpu = CPUService()
     
@@ -15,7 +15,8 @@ struct MainApp: App {
     
     @AppStorage("selectedMode") var selectedMode: Mode = .system
     @AppStorage("selectedFormat") var selectedFormat: menubarFormat = .regular
-    
+    @AppStorage("menuBarBattery") private var menuBarBattery = true
+
     private var colorScheme: ColorScheme? {
         switch selectedMode {
         case .system: return nil
@@ -28,24 +29,23 @@ struct MainApp: App {
     var body: some Scene {
         WindowGroup("Battery Monitor", id: "main") {
             WindowView()
+                .frame(minWidth: 550, idealWidth: 550, maxWidth: 550)
+                .frame(minHeight: 700, idealHeight: 700, maxHeight: 700)
                 .preferredColorScheme(colorScheme)
-                .background(.bar)
                 .environmentObject(monitor)
-                .environmentObject(modelRunner)
+                .environmentObject(model)
                 .environmentObject(cpu)
                 .environmentObject(mem)
-
         }
+        .defaultSize(width: 550, height: 700)
+        .windowResizability(.contentSize)
         
         
-        
-        MenuBarExtra {
+        MenuBarExtra(isInserted: $menuBarBattery) {
             MenuBarView()
                 .background(.clear.opacity(0.2))
                 .preferredColorScheme(colorScheme)
                 .environmentObject(monitor)
-
-                
         }
         label: {
             HStack {
@@ -65,7 +65,7 @@ struct MainApp: App {
         }
         .menuBarExtraStyle(.window)
         
-
+        
         
         #if os(macOS)
         Settings {
@@ -73,10 +73,9 @@ struct MainApp: App {
                 .frame(minWidth: 300, maxWidth: 500, minHeight: 500, maxHeight: 1000)
                 .preferredColorScheme(colorScheme)
                 .environmentObject(monitor)
-                .environmentObject(modelRunner)
+                .environmentObject(model)
                 .environmentObject(cpu)
                 .environmentObject(mem)
-
         }
         .windowResizability(.automatic)
         #endif

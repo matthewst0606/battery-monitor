@@ -8,7 +8,7 @@ import SwiftUI
 
 struct CPUPowermetricsView: View {
     @EnvironmentObject var cpu: CPUService
-    @EnvironmentObject var model: PythonModelRunner
+    @EnvironmentObject var model: ModelService
     
     var body: some View {
         

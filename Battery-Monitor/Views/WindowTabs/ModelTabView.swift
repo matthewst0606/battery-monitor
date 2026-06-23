@@ -8,25 +8,28 @@
 import SwiftUI
 
 struct ModelTabView: View {
-    @EnvironmentObject var model: PythonModelRunner
-    
+    @EnvironmentObject var model: ModelService
+
     
     var body: some View {
         VStack {
             HStack {
-                Text("Model Output")
+                Text("Model Logs")
                     .widgetText()
                     .padding(.vertical, 15)
             }
-            .frame(minWidth: 450, maxWidth: 450, alignment: .top)
+            .frame(minWidth: 500, maxWidth: 500, alignment: .top)
             .background(.bar)
             .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-
+            
             ScrollView {
                 Text(model.modelOutput)
                     .widgetText()
                     .textSelection(.enabled)
             }
+            .frame(minWidth: 500, maxWidth: 500, alignment: .top)
+            .background(.bar)
+            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
         }
         .windowTabStyle(title: "Model Output")
         .navigationTitle(Text("Model Output"))

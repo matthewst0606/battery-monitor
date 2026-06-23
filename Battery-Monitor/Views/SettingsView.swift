@@ -6,13 +6,11 @@ import AppKit
 
 struct SettingsView: View {
     @EnvironmentObject var monitor: BatteryMonitor
-    @EnvironmentObject var modelRunner: PythonModelRunner
+    @EnvironmentObject var model: ModelService
     @EnvironmentObject var cpu: CPUService
 
     @AppStorage("selectedColor") private var selectedColorData: Data = Data()
     @State private var colorPickerColor: Color = .blue
-    @State private var menuBarBattery = true
-    @State private var enableAutoAdjust = false
     
     
     private var CustomizeTab: some View { CustomizeTabView() }

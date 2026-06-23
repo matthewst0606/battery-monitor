@@ -10,7 +10,7 @@ import Charts
 
 
 struct BatteryPowermetricsView: View {
-    @EnvironmentObject var model: PythonModelRunner
+    @EnvironmentObject var model: ModelService
         
     var body: some View {
         VStack(spacing: 5) {
@@ -52,10 +52,17 @@ struct BatteryTabView: View {
                     case 1000...2000: ListItem(arg1: "Time Remaining", arg2: "\(monitor.timeRemainingText)", arg3: .green)
                     case 500...1000:  ListItem(arg1: "Time Remaining", arg2: "\(monitor.timeRemainingText)", arg3: .yellow)
                     case 300...500:   ListItem(arg1: "Time Remaining", arg2: "\(monitor.timeRemainingText)", arg3: .orange)
-                    case 0...300:   ListItem(arg1: "Time Remaining", arg2: "\(monitor.timeRemainingText)", arg3: .red)
-                    default:                ListItem(arg1: "Time Remaining", arg2: "calculating...", arg3: .primary)
+                    case 0...300:
+                        if monitor.timeRemainingText == "0:00" && battInfo.powerSourceState == "AC Power"
+                            { ListItem(arg1: "Time Remaining", arg2: "Fully Charged", arg3: .green) }
+                        else
+                            { ListItem(arg1: "Time Remaining", arg2: "\(monitor.timeRemainingText)", arg3: .red) }
+                    default: ListItem(arg1: "Time Remaining", arg2: "calculating...", arg3: .primary)
                     }
                     
+                    ListItem(arg1: "Power Source", arg2: "\(battInfo.powerSourceState)", arg3: .primary)
+                    ListItem(arg1: "Battery Temperature", arg2: "\(battInfo.temperature) ℃", arg3: .primary)
+
                     
                     switch battInfo.powerMode {
                     case 1: ListItem(arg1: "Low Power Mode", arg2: "On", arg3: .primary)
@@ -67,6 +74,7 @@ struct BatteryTabView: View {
                     case true:  ListItem(arg1: "Charging Status", arg2: "Yes", arg3: .primary)
                     default:    ListItem(arg1: "Charging Status", arg2: "No", arg3: .primary)
                     }
+                    
                     
                 }
             }.unscrollableListStyle()

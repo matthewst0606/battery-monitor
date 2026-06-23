@@ -14,7 +14,6 @@ struct CustomizeTabView: View {
     @AppStorage("selectedColor") private var selectedColorData: Data = Data()
     @State private var colorPickerColor: Color = .blue
     @State private var menuBarBattery = true
-    @State private var enableAutoAdjust = false
     
     
     private func createColorPicker(_ title: String, selection: Binding<Color>) -> some View {

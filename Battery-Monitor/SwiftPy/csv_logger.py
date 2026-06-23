@@ -19,29 +19,33 @@ def data_file(file_name):
 
     raise FileNotFoundError(f"Could not find {file_name}")
 
+def read_data_csv(file_name):
+    dataframe = pd.read_csv(data_file(file_name), skipinitialspace=True)
+    if dataframe.empty:
+        raise ValueError(f"{file_name} does not contain any data rows")
+    return dataframe
+
 # returns the data from system_info.csv and adds a new row
 # if the device is on battery power
 # -------------------------------------------------
-def insert_row(system_info, process_df, cpu_usage, gpu_df, battery_info, encoded_battery_info):
+def insert_row(system_info, process_df, cpu_usage, gpu_df):
     # read current data from system_info.csv
-    battery_df = pd.read_csv(data_file("system_info.csv"))
-    battery_df2 = pd.read_csv(data_file("battery.csv"))
+    system_df = read_data_csv("system_info.csv")
+    battery_df = read_data_csv("battery.csv")
     
     
-    
-    cpu_df = pd.read_csv(data_file("cpu.csv"))
-    memory_df = pd.read_csv(data_file("memory.csv"))
+    cpu_df = read_data_csv("cpu.csv")
+    memory_df = read_data_csv("memory.csv")
     
     # create a new row when new data is collected
     new_row = {
-        "Battery_Percent": battery_df2[" batteryLevel"].iloc[-1],
-        "Time_Remaining": battery_df2[" timeRemaining"].iloc[-1],
-
-        "Battery_Condition": battery_info["battery_condition"],
-        "Maximum_Capacity": battery_df2[" batteryHealth"].iloc[-1],
-        
-        "Cycle_Count": battery_info["cycle_count"],
-        "Low_Power_Mode": battery_df2[" powerMode"].iloc[-1],
+        "Battery_Percent": battery_df["batteryLevel"].iloc[-1],
+        "Time_Remaining": battery_df["timeRemaining"].iloc[-1],
+        "Battery_Condition": battery_df["batteryCondition"].iloc[-1],
+        "Maximum_Capacity": battery_df["batteryHealth"].iloc[-1],
+        "Cycle_Count": battery_df["cycleCount"].iloc[-1],
+        "Charging": battery_df["isCharging"].iloc[-1],
+        "Low_Power_Mode": battery_df["powerMode"].iloc[-1],
 
         "Process_Count": system_info["Process_Count"],
         "Process_Power": round(process_df["POWER"].sum(), 2),
@@ -49,16 +53,16 @@ def insert_row(system_info, process_df, cpu_usage, gpu_df, battery_info, encoded
 
 
         # new CPU cols
-        "CPU_Usage": cpu_df[" cpuTotal"].iloc[-1],
-        "CPU_User": cpu_df[" cpuUser"].iloc[-1],
-        "CPU_System": cpu_df[" cpuSystem"].iloc[-1],
-        "CPU_Idle": cpu_df[" cpuIdle"].iloc[-1],
+        "CPU_Usage": cpu_df["cpuTotal"].iloc[-1],
+        "CPU_User": cpu_df["cpuUser"].iloc[-1],
+        "CPU_System": cpu_df["cpuSystem"].iloc[-1],
+        "CPU_Idle": cpu_df["cpuIdle"].iloc[-1],
         
         # new memory cols
-        "Total_Memory": memory_df[" totalGB"].iloc[-1],
-        "Used_Memory": memory_df[" usedGB"].iloc[-1],
-        "Cached_Memory": memory_df[" cachedGB"].iloc[-1],
-        "Available_Memory": memory_df[" availableGB"].iloc[-1],
+        "Total_Memory": memory_df["totalGB"].iloc[-1],
+        "Used_Memory": memory_df["usedGB"].iloc[-1],
+        "Cached_Memory": memory_df["cachedGB"].iloc[-1],
+        "Available_Memory": memory_df["availableGB"].iloc[-1],
         
         
         # old CPU cols
@@ -67,16 +71,27 @@ def insert_row(system_info, process_df, cpu_usage, gpu_df, battery_info, encoded
         "old_CPU_Residency": cpu_usage["active_residency"].iloc[-1],
         "old_CPU_idle": cpu_usage["idle_residency"].iloc[-1],
 
-        "GPU_Power": gpu_df["gpu_power"].iloc[0],
-        "Avg_GPU_Frequency": gpu_df["active_frequency"].iloc[0],
-        "Avg_GPU_Residency": gpu_df["active_residency"].iloc[0],
-        "Avg_GPU_idle": gpu_df["idle_residency"].iloc[0],
+        "GPU_Power": gpu_df["gpu_power"].iloc[-1],
+        "Avg_GPU_Frequency": gpu_df["active_frequency"].iloc[-1],
+        "Avg_GPU_Residency": gpu_df["active_residency"].iloc[-1],
+        "Avg_GPU_idle": gpu_df["idle_residency"].iloc[-1],
     }
         
     # adds the new row to the system_info.csv file
-    battery_df = pd.concat([battery_df, pd.DataFrame([new_row])], ignore_index=True)
-    battery_df.to_csv(data_file("system_info.csv"), index=False)
-    return battery_df
+    new_df_row = pd.DataFrame([new_row])
+    pd.DataFrame([new_row]).to_csv(
+        data_file("system_info.csv"),
+        mode="a",
+        header=False,
+        index=False
+    )
+
+    return pd.concat([system_df, new_df_row], ignore_index=True)
+
+
+
+
+
 
 
 # creates the data in data/system_processes
@@ -95,6 +110,13 @@ def process_row(process_info):
         process_df.to_csv(data_file("system_processes.csv"), index=False)
 
     return process_df
+
+
+
+
+
+
+
 
 # creates the data in data/cpu_usage
 def cpu_row(powermetrics_info):

@@ -8,13 +8,13 @@
 import SwiftUI
 
 struct MemoryPowermetricsView: View {
-    @EnvironmentObject var model: PythonModelRunner
+    @EnvironmentObject var model: ModelService
 
     var body: some View {
         VStack(spacing: 5) {
             List {
                 if let result = model.result {
-                    ListItem(arg1: "Total Memory", arg2: String(format: "%.2fGB", result.usedMemory), arg3: .primary)
+                    ListItem(arg1: "Total Memory", arg2: String(format: "%.2fGB", result.totalMemory), arg3: .primary)
                     ListItem(arg1: "Used Memory", arg2: String(format: "%.2fGB", result.usedMemory), arg3: .primary)
                 }
             }.unscrollableListStyle()

@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct GpuTabView: View {
-    @EnvironmentObject var model: PythonModelRunner
+    @EnvironmentObject var model: ModelService
 
     var body: some View {
         VStack(spacing: 5) {

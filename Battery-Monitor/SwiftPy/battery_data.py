@@ -1,18 +1,13 @@
-
 import psutil
-import datetime
-import platform
 import subprocess
 
 class GetBatteryData:
     def __init__(self):
         self.system_info = {}
-        self.battery_dict = {}
         self.process_dict = {}
         self.powermetrics_dict = {}
 
         self.system_info = self.get_system_info()
-        self.battery_dict = self.get_battery_info()
         self.process_dict = self.get_process_info()
         self.powermetrics_dict = self.get_powermetrics_info()
 
@@ -25,39 +20,7 @@ class GetBatteryData:
         self.system_info['Process_Count'] = len(psutil.pids())
         return self.system_info
 
-    # gets battery info from the system and add each
-    # item to a dictionary
-    # ----------------------------------------------------
-    def get_battery_info(self):
-        # get output from command
-        battery = subprocess.getoutput("system_profiler SPPowerDataType")
 
-        # add each item from the output into the dictionary
-        for index in battery.splitlines():
-            if ":" in index:
-                key, value = index.split(":", 1)
-                key, value = key.strip(), value.strip()
-                self.battery_dict[key] = value
-
-
-        battery_condition = self.battery_dict["Condition"]
-        cycle_count = self.battery_dict["Cycle Count"]
-
-        # another command (previous doesnt have time remaining)
-        battery_info = subprocess.getoutput("pmset -g batt")
-        batteryInfo_list = battery_info.split()
-
-        time_remaining = batteryInfo_list[9].replace(":", "")
-
-
-        # wait for the system to calculate the estimated remaining time
-        if time_remaining == "(no": return None
-
-        # return a dictionary
-        return {
-            "cycle_count": int(cycle_count),
-            "battery_condition": battery_condition,
-        }
 
     def get_process_info(self):
         processes = subprocess.getoutput("""

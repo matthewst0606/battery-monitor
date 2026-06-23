@@ -10,9 +10,8 @@ import Foundation
 import Combine
 
 class ServiceHelper {
-    private var updateTimer: AnyCancellable?
-    
     @AppStorage("selectedUpdateInterval") var selectedUpdateInterval: UpdateInterval = .five
+    private var updateTimer: AnyCancellable?
 
 
     func createTimer(action: @escaping () -> Void) {

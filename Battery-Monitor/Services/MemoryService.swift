@@ -30,6 +30,7 @@ class MemoryService: ObservableObject {
     
     func getMemoryInfo() -> MemoryInfo? {
         var stats = vm_statistics64()
+        
         var count = mach_msg_type_number_t(
             MemoryLayout<vm_statistics64_data_t>.size /
             MemoryLayout<integer_t>.size
@@ -46,13 +47,11 @@ class MemoryService: ObservableObject {
             }
         }
         
-                
         let usedBytes = (
             UInt64(stats.internal_page_count) +
             UInt64(stats.compressor_page_count) +
             UInt64(stats.wire_count)
         ) * UInt64(vm_kernel_page_size)
-        
         
         let cachedBytes = (
             UInt64(stats.inactive_count) +
@@ -60,12 +59,14 @@ class MemoryService: ObservableObject {
         ) * UInt64(vm_kernel_page_size)
         
         
+        
+        // formatting the bytes into GB
         let totalGB = Double(phyMemory) / 1024 / 1024 / 1024
         let usedGB = Double(usedBytes) / 1024 / 1024 / 1024
         let cachedGB = Double(cachedBytes) / 1024 / 1024 / 1024
         let availableGB = Double(totalGB - usedGB)
         
-        
+        // return the memory info
         return MemoryInfo (
             total: totalGB,
             used: usedGB,
@@ -80,6 +81,7 @@ class MemoryService: ObservableObject {
         do {
             let url = try appDataDirectory(fileName: "memory.csv")
 
+            // formatting the date
             let formatter = DateFormatter()
             formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
             let timestamp = formatter.string(from: Date())

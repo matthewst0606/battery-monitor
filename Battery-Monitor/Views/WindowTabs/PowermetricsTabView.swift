@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct PowermetricsTabView: View {
-    @EnvironmentObject var modelRunner: PythonModelRunner
+    @EnvironmentObject var model: ModelService
     @EnvironmentObject var cpu: CPUService
     @EnvironmentObject var mem: MemoryService
     
@@ -21,22 +21,22 @@ struct PowermetricsTabView: View {
     // powermetrics page tabs
     private var BatteryPowermetrics: some View {
         BatteryPowermetricsView()
-            .environmentObject(modelRunner)
+            .environmentObject(model)
     }
     private var CPUPowermetrics: some View {
         CPUPowermetricsView()
-            .environmentObject(modelRunner)
+            .environmentObject(model)
     }
     private var MemoryPowermetrics: some View {
         MemoryPowermetricsView()
     }
     private var GPUView: some View {
         GpuTabView()
-            .environmentObject(modelRunner)
+            .environmentObject(model)
     }
     private var ProcessesView: some View {
         ProcessesTabView()
-            .environmentObject(modelRunner)
+            .environmentObject(model)
     }
         
     
@@ -51,20 +51,11 @@ struct PowermetricsTabView: View {
                 .imageScale(.large)
                 .foregroundStyle(Color.primary, Color.dataToColor(from: selectedColorData) ?? selectedAccentColor)
             
-            List {
-                ListItem(arg1: "Chip", arg2: "\(cpu.getChipName())", arg3: .primary)
-                ListItem(arg1: "Memory", arg2: "\(Int(mem.info!.total)) GB", arg3: .primary)
-                ListItem(arg1: "Version", arg2: "\(ProcessInfo.processInfo.operatingSystemVersionString)", arg3: .primary)
-            }
-            .listStyle(.plain)
-            .scrollDisabled(true)
-            .frame(minWidth: 300, maxWidth: 500)
-            .frame(height: 100)
 
     
         }
-        .padding(.horizontal, 10)
-        .padding(.vertical, 5)
+        .padding(.vertical, 10)
+        .frame(minWidth: 300, maxWidth: 500)
         .background(.background)
         .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
     }
@@ -85,11 +76,11 @@ struct PowermetricsTabView: View {
             .frame(minWidth: 300, maxWidth: 500)
 
             switch selectedPowermetrics {
-            case "batt":  BatteryPowermetrics.environmentObject(modelRunner)
-            case "cpu": CPUPowermetrics.environmentObject(modelRunner)
-            case "gpu": GPUView.environmentObject(modelRunner)
-            case "mem": MemoryPowermetrics.environmentObject(modelRunner)
-            case "processes": ProcessesView.environmentObject(modelRunner)
+            case "batt":  BatteryPowermetrics.environmentObject(model)
+            case "cpu": CPUPowermetrics.environmentObject(model)
+            case "gpu": GPUView.environmentObject(model)
+            case "mem": MemoryPowermetrics.environmentObject(model)
+            case "processes": ProcessesView.environmentObject(model)
             default: BatteryPowermetrics
             }
         }

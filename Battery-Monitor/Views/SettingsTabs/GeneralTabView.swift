@@ -16,6 +16,8 @@ enum menubarFormat: String, CaseIterable, Identifiable {
     var id: Self {self}
 }
 
+
+
 enum UpdateInterval: Int, CaseIterable, Identifiable {
     case one=1, two=2, three=3, five=5, ten=10
     var id: Self {self}
@@ -50,7 +52,7 @@ enum PowermetricsInterval: Int, CaseIterable, Identifiable {
 // creates the elements of the general tab in settings
 struct GeneralTabView: View {
     @EnvironmentObject var monitor: BatteryMonitor
-    @EnvironmentObject var modelRunner: PythonModelRunner
+    @EnvironmentObject var model: ModelService
     @EnvironmentObject var cpu: CPUService
     @EnvironmentObject var mem: MemoryService
     
@@ -60,8 +62,7 @@ struct GeneralTabView: View {
     @AppStorage("selectedPowermetricsInterval") var selectedPowermetricsInterval: PowermetricsInterval = .thirty
     
     @State private var colorPickerColor: Color = .blue
-    @State private var menuBarBattery = true
-    @State private var enableAutoAdjust = false
+    @AppStorage("menuBarBattery") private var menuBarBattery = true
     
     private let serviceHelper = ServiceHelper()
     
@@ -96,10 +97,7 @@ struct GeneralTabView: View {
                 Toggle("Show in Menubar", isOn: $menuBarBattery)
                     .padding()
                     .toggleStyle(.switch)
-                
-                Toggle("Enable Auto Adjust", isOn: $enableAutoAdjust)
-                    .padding()
-                    .toggleStyle(.switch)
+
             }
             .listStyle(.inset)
             .scrollContentBackground(.hidden)
@@ -127,7 +125,7 @@ struct GeneralTabView: View {
             }
         }
         .onChange(of: selectedPowermetricsInterval) {
-            modelRunner.updatePy()
+            model.updatePy()
         }
     }
     

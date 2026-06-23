@@ -1,5 +1,5 @@
 //
-//  PythonModelRunner.swift
+//  ModelService.swift
 //  Battery-Monitor
 //
 //  Created by Matt on 6/8/26.
@@ -10,15 +10,15 @@ import IOKit.ps
 import SwiftUI
 
 
-class PythonModelRunner: ObservableObject {
+class ModelService: ObservableObject {
     @AppStorage("selectedPowermetricsInterval") var selectedPowermetricsInterval: PowermetricsInterval = .thirty
     @Published var modelOutput = ""
     @Published var result: PythonResult?
     
     private var pythonTimer: AnyCancellable?
-    private var isRunningPython = false
     private let serviceHelper = ServiceHelper()
-    
+    var isRunningPython = false
+
     
     init() {
         pythonTimer = Timer.publish(
@@ -29,9 +29,7 @@ class PythonModelRunner: ObservableObject {
         .autoconnect()
         .sink { [weak self] _ in
             
-            guard let self = self, !self.isRunningPython else {
-                return
-            }
+            guard let self = self, !self.isRunningPython else { return }
             self.isRunningPython = true
             
             DispatchQueue.global(qos: .background).async {
@@ -51,7 +49,7 @@ class PythonModelRunner: ObservableObject {
         
         do { try process.run() }
         catch { print("Failed to run Python:", error) }
-        
+
         let output = String(
             data: outputPipe.fileHandleForReading.readDataToEndOfFile(),
             encoding: .utf8
@@ -75,9 +73,12 @@ class PythonModelRunner: ObservableObject {
                 self.modelOutput = output
             }
         }
+        
+        
+        print(output)
         return output
     }
-    
+        
     private func makePythonProcess() -> (process: Process, outputPipe: Pipe, errorPipe: Pipe) {
         let process = Process()
         let outputPipe = Pipe()
@@ -93,11 +94,12 @@ class PythonModelRunner: ObservableObject {
                     throw CocoaError(.fileNoSuchFile)
                 }
             }
-
             let dataDirectory = try appDataDirectory()
+            
             var environment = ProcessInfo.processInfo.environment
             environment["BATTERY_MONITOR_DATA_DIR"] = dataDirectory.path
             process.environment = environment
+            
         } catch {
             print("Unable to prepare model data directory:", error)
         }
@@ -112,12 +114,20 @@ class PythonModelRunner: ObservableObject {
     
 
     func updatePy() {
+        guard !isRunningPython else { return }
+        isRunningPython = true
         self.modelOutput = "Loading..."
+        
         DispatchQueue.global(qos: .background).async {
             _ = self.getPy()
             
+            DispatchQueue.main.async {
+                self.isRunningPython = false
+            }
         }
     }
+    
+    
     
     func formatBatteryPrediction(_ value: Double) -> String {
         let raw = Int(value.rounded())
@@ -128,11 +138,6 @@ class PythonModelRunner: ObservableObject {
         else { return "\(minutes)m" }
     }
 }
-
-
-
-
-
 
 
 struct PythonResult: Codable {
@@ -163,12 +168,11 @@ struct PythonResult: Codable {
     var CpuFrequency: Double{ Double(features["old_CPU_Frequency"] ?? 0)}
     var CpuResidency: Double{ Double(features["old_CPU_Residency"] ?? 0)}
     var CpuIdle:Double { Double(features["CPU_Idle"] ?? 0)}
-    var CpuPower:Double{ Double(features["old_CPU_Power"] ?? 0) }
+    var CpuPower:Double{ Double(features["old_CPU_Power"] ?? 0) / 1000 }
     
     var GpuFrequency: Double{ Double(features["Avg_GPU_Frequency"] ?? 0) }
     var GpuResidency: Double{ Double(features["Avg_GPU_Residency"] ?? 0) }
     var GpuIdle:Double { Double(features["Avg_GPU_idle"] ?? 0) }
-    var GpuPower:Double{ Double(features["GPU_Power"] ?? 0) }
+    var GpuPower:Double{ Double(features["GPU_Power"] ?? 0) / 1000 }
     var GpuUsage: Double { Double(100 - self.GpuIdle) }
-
 }
