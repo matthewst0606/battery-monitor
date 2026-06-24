@@ -5,11 +5,19 @@ import AppKit
 @main
 struct MainApp: App {
     @StateObject private var battery = BatteryService()
-    @StateObject private var model = ModelService()
+    @StateObject private var model: ModelService
     @StateObject private var mem =  MemoryService()
     @StateObject private var cpu = CPUService()
     @StateObject private var process = ProcessService()
 
+    
+    init() {
+        let battery = BatteryService()
+        _battery = StateObject(wrappedValue: battery)
+        _model = StateObject(
+            wrappedValue: ModelService(powerSourceState: battery.info?.powerSourceState)
+        )
+    }
     
     @State private var settings = SettingsView()
     @AppStorage("selectedColor") private var selectedColorData: Data = Data()
@@ -20,6 +28,9 @@ struct MainApp: App {
     @AppStorage("menuBarBattery") private var menuBarBattery = true
     @AppStorage("inMenuBar") var inMenuBar: ShowInMenuBar = .timeRemaining
 
+    
+    
+    
     private var colorScheme: ColorScheme? {
         switch selectedMode {
         case .system: return nil

@@ -21,8 +21,6 @@ class CPUService: ObservableObject {
     private let serviceHelper = ServiceHelper()
 
     
-
-    
     init() {
         self.info = getProcessorInfo()
         serviceHelper.createTimer {
@@ -142,38 +140,21 @@ class CPUService: ObservableObject {
         }
     }
     
+    
+    
+    // appends the new battery info to cpu.csv
     private func logCPUInfo() {
-        do {
-            let url = try appDataDirectory(fileName: "cpu.csv")
-            
-            
-            let formatter = DateFormatter()
-            formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
-            
-            
-            let timestamp = formatter.string(from: Date())
-            let cpuTotal = String(format: "%.2f", info?.total ?? 0)
-            let cpuUser = String(format: "%.2f",info?.user ?? 0)
-            let cpuSystem = String(format: "%.2f",info?.sys ?? 0)
-            let cpuIdle = String(format: "%.2f",info?.idle ?? 0)
-            
-            let row = "\(timestamp), \(cpuTotal), \(cpuUser), \(cpuSystem), \(cpuIdle)\n"
-            
-            if !FileManager.default.fileExists(atPath: url.path) {
-                try? "timestamp, cpuTotal, cpuUser, cpuSystem, cpuIdle\n"
-                    .write(to: url, atomically: true, encoding: .utf8)
-            }
-            
-            if let handle = try? FileHandle(forWritingTo: url) {
-                _ = try? handle.seekToEnd()
-                handle.write(row.data(using: .utf8)!)
-                try? handle.close()
-            }
-        }
-        catch {
-            print("failed to write cpu log!")
-        }
+        let values = [
+            logTimestamp(),
+            String(format: "%.2f", info?.total ?? 0),
+            String(format: "%.2f",info?.user ?? 0),
+            String(format: "%.2f",info?.sys ?? 0),
+            String(format: "%.2f",info?.idle ?? 0),
+        ]
+        
+        logToCSV("cpu.csv", values)
     }
+        
 }
 
 struct RawCPUInfo {

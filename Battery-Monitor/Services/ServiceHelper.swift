@@ -22,11 +22,6 @@ class ServiceHelper {
             in: .common
         )
         .autoconnect()
-        .sink { _ in
-            action()
-        }
-    
-    
-}
-
+        .sink { _ in action() }
+    }
 }

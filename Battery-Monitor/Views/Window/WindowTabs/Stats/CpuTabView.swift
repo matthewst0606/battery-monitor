@@ -69,3 +69,14 @@ struct CPUTabView: View {
         .appTabStyle()
     }
 }
+
+struct CPUMenuView: View {
+    @State private var test: Bool = true
+
+    var body: some View {
+        Toggle("CPU Usage", isOn: $test)
+        Toggle("User Usage", isOn: $test)
+        Toggle("System Usage", isOn: $test)
+        Toggle("System Idle", isOn: $test)
+    }
+}

@@ -20,7 +20,7 @@ class ModelService: ObservableObject {
     var isRunningPython = false
 
     
-    init() {
+    init(powerSourceState: String?) {
         pythonTimer = Timer.publish(
             every: TimeInterval(selectedPowermetricsInterval.rawValue),
             on: .main,
@@ -29,7 +29,11 @@ class ModelService: ObservableObject {
         .autoconnect()
         .sink { [weak self] _ in
             
-            guard let self = self, !self.isRunningPython else { return }
+            guard let self = self,
+                    !self.isRunningPython,
+                    powerSourceState != "AC Power"
+            else { return }
+            
             self.isRunningPython = true
             
             DispatchQueue.global(qos: .background).async {
@@ -113,8 +117,10 @@ class ModelService: ObservableObject {
     }
     
 
-    func updatePy() {
-        guard !isRunningPython else { return }
+    func updatePy(powerSourceState: String?) {
+        guard !isRunningPython,
+              powerSourceState != "AC Power"
+        else { return }
         isRunningPython = true
         self.modelOutput = "Loading..."
         

@@ -22,18 +22,15 @@ struct CustomizeTabView: View {
     @AppStorage("selectedFormat") var selectedFormat: menubarFormat = .regular
 
     @State private var colorPickerColor: Color = .blue
-//    @State private var menuBarBattery = true
     
     
     private func createColorPicker(_ title: String, selection: Binding<Color>) -> some View {
         VStack {
-            
             HStack {
                 Text(title)
                 Spacer()
                 ColorPicker("", selection: selection)
             }
-            
         }
     }
     

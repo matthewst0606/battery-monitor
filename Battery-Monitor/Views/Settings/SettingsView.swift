@@ -18,12 +18,16 @@ struct SettingsView: View {
                     
                     HStack {
                         createTab(title: "General", tag: "general", selectedStat: $selectedTab)
+                        createTab(title: "Model", tag: "model", selectedStat: $selectedTab)
+
                         createTab(title: "Customize", tag: "customize", selectedStat: $selectedTab)
                     }
                     .frame(minWidth: 300, maxWidth: 500)
 
                     switch selectedTab {
                     case "general": GeneralTab
+                    case "model": GeneralTab
+
                     case "customize": CustomizeTab
                     default: GeneralTab
                     }

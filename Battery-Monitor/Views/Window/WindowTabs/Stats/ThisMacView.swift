@@ -14,6 +14,44 @@ struct ThisMacView: View {
     @AppStorage("selectedColor") private var selectedColorData: Data = Data()
     @State private var selectedAccentColor: Color = .accentColor
     
+    @State private var test: Bool = true
+    @Binding var selectedStat: String
+
+    private var battMenu: some View { BatteryMenuView() }
+    private var CPUMenu: some View { CPUMenuView() }
+    private var MemoryMenu: some View { MemoryMenuView() }
+
+    
+    var MenuView: some View {
+        VStack {
+            Menu {
+                switch selectedStat {
+                case "batt": battMenu
+                case "cpu": CPUMenu
+                case "mem": MemoryMenu
+                default: battMenu
+                    
+
+                
+
+                }
+
+            }
+            label: {
+                Image(systemName: "line.3.horizontal")
+                    .font(.system(size: 13, weight: .semibold))
+                    .frame(width: 50, height: 25)
+                    .background {
+                        RoundedRectangle(cornerRadius: 10).glassEffect()
+                    }
+            }
+            .menuIndicator(.hidden)
+            .buttonStyle(.plain)
+            .help("layout")
+
+        }
+    }
+    
     var body: some View {
         VStack {
             HStack {
@@ -38,6 +76,11 @@ struct ThisMacView: View {
             .scrollDisabled(true)
             .frame(minWidth: 300, maxWidth: 500)
             .frame(height: 200)
+            
+            if selectedStat != "process" {
+                HStack { MenuView }
+                    .frame(maxWidth: .infinity, alignment: .trailing)
+            }
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 5)

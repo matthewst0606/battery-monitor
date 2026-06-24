@@ -12,6 +12,7 @@ import Charts
 struct BatteryPowermetricsView: View {
     @EnvironmentObject var model: ModelService
         
+    
     var body: some View {
         VStack(spacing: 5) {
             List {
@@ -29,7 +30,7 @@ struct BatteryPowermetricsView: View {
 
 struct BatteryTabView: View {
     @EnvironmentObject var battery: BatteryService
-
+    
     var body: some View {
         VStack(spacing: 5) {
             List {
@@ -83,8 +84,7 @@ struct BatteryTabView: View {
                     case true: ListItem(arg1: "Charging Status", arg2: "Yes", arg3: .primary)
                     default:   ListItem(arg1: "Charging Status", arg2: "No", arg3: .primary)
                     }
-                    
-                    
+
                 }
             }.unscrollableListStyle()
         }.appTabStyle()
@@ -92,3 +92,16 @@ struct BatteryTabView: View {
 }
 
 
+struct BatteryMenuView: View {
+    @State private var test: Bool = true
+
+    var body: some View {
+        Toggle("Battery Level", isOn: $test)
+        Toggle("Battery Health", isOn: $test)
+        Toggle("Time Remaining", isOn: $test)
+        Toggle("Power Source", isOn: $test)
+        Toggle("Battery Temperature", isOn: $test)
+        Toggle("Low Power Mode", isOn: $test)
+        Toggle("Charging Status", isOn: $test)
+    }
+}

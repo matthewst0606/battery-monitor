@@ -18,6 +18,8 @@ struct GeneralTabView: View {
     @AppStorage("selectedPowermetricsInterval") var selectedPowermetricsInterval: PowermetricsInterval = .thirty
 
     @State private var colorPickerColor: Color = .blue
+    @State private var enablePowermetrics: Bool = true
+
     
     private let serviceHelper = ServiceHelper()
     
@@ -39,11 +41,22 @@ struct GeneralTabView: View {
                     
                 }.padding()
                 
-                Picker("Powermetrics Update Interval", selection: $selectedPowermetricsInterval) {
-                    ForEach(PowermetricsInterval.allCases) { interval in
-                        Text(interval.label).tag(interval)
-                    }
-                }.padding()
+                
+                Toggle("Enable Powermetrics", isOn: $enablePowermetrics)
+                    .padding()
+                    .toggleStyle(.switch)
+                
+                
+                
+                if enablePowermetrics {
+                    Picker(
+                        "Powermetrics Update Interval",
+                        selection: $selectedPowermetricsInterval) {
+                        ForEach(PowermetricsInterval.allCases) { interval in
+                            Text(interval.label).tag(interval)
+                        }
+                    }.padding()
+                }
                 
 
 
@@ -61,7 +74,7 @@ struct GeneralTabView: View {
             }
         }
         .onChange(of: selectedPowermetricsInterval) {
-            model.updatePy()
+            model.updatePy(powerSourceState: battery.info?.powerSourceState)
         }
     }
     

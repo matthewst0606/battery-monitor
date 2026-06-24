@@ -19,11 +19,6 @@ class BatteryService: ObservableObject {
     @Published var info: BatteryInfo?
     private let serviceHelper = ServiceHelper()
     
-
-    
-    
-    
-    
     
     // returns a string that displays how long it will take until
     // battery is dead or fully charged
@@ -171,41 +166,27 @@ class BatteryService: ObservableObject {
     }
     
     
-    
+    // appends the new battery info to battery.csv
     private func logBatteryInfo() {
-        guard let info = info
-        else { return }
+        guard let info = info else { return }
+        let values = [
+            logTimestamp(),
+            String(info.batteryLevel),
+            String(info.batteryHealth),
+            String(info.batteryCondition),
+            String(format: "%.0f",info.timeRemaining),
+            String(info.powerMode),
+            String(info.isCharging ? 1 : 0),
+            String(info.cycleCount),
+            String(info.temperature)
+            
+        ]
         
-        do {
-            let url = try appDataDirectory(fileName: "battery.csv")
-
-            
-            let formatter = DateFormatter()
-            formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
-            
-            let timestamp = formatter.string(from: Date())
-            let batteryLevel = String(info.batteryLevel)
-            let timeRemaining = String(format: "%.0f",info.timeRemaining)
-            let cycleCount = String(info.cycleCount)
-            let isCharging = String(info.isCharging ? 1 : 0)
-            let batteryHealth = String(info.batteryHealth)
-            let batteryCondition = String(info.batteryCondition)
-            let powerMode = String(info.powerMode)
-            let temperature = String(info.temperature)
-            
-            let row = "\(timestamp), \(batteryLevel), \(batteryHealth), \(batteryCondition), \(timeRemaining), \(powerMode), \(isCharging), \(cycleCount), \(temperature)\n"
-            if !FileManager.default.fileExists(atPath: url.path) {
-                try? row.write(to: url, atomically: true, encoding: .utf8)
-            }
-            
-            if let handle = try? FileHandle(forWritingTo: url) {
-                _ = try? handle.seekToEnd()
-                handle.write(row.data(using: .utf8)!)
-                try? handle.close()
-            }
-        }
-        catch { print("failed to write battery log!") }
+        logToCSV("battery.csv", values)
     }
+    
+    
+
     
     
     // formatting:
@@ -223,9 +204,6 @@ class BatteryService: ObservableObject {
             default:       return "battery.100percent"
         }
     }
-    
-    
-
     
     
     func formatHMS(_ interval: TimeInterval) -> String {

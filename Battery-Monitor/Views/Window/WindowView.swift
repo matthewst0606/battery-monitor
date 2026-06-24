@@ -11,6 +11,7 @@ import MachO
 import Darwin
 
 struct WindowView: View {
+    @EnvironmentObject private var battery: BatteryService
     @EnvironmentObject private var model: ModelService
 
     private var StatsTab: some View { StatsTabView() }
@@ -28,7 +29,7 @@ struct WindowView: View {
         .background(.regularMaterial)
         .onAppear() {
             if !model.isRunningPython {
-                model.updatePy()
+                model.updatePy(powerSourceState: battery.info?.powerSourceState)
             }
         }
 

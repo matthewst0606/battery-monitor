@@ -5,10 +5,10 @@ import torch.nn as nn
 
 class BatteryModel:
     # --- initialize a sequential model & optimizer ---
-    def __init__(self, device):
+    def __init__(self):
         torch.manual_seed(0)
+        self.device = 'cpu'
         self.loss_fc = nn.L1Loss()
-
         self.model = nn.Sequential(
             nn.Linear(24, 128),
             nn.ReLU(),
@@ -17,7 +17,7 @@ class BatteryModel:
             nn.Linear(64, 32),
             nn.ReLU(),
             nn.Linear(32, 1),
-        ).to(device)
+        ).to(self.device)
 
         # -------- create an optimizer --------
         self.optimizer = optim.Adam(
@@ -40,12 +40,12 @@ class BatteryModel:
 
 
     # --- evaluate model results on validation data ---
-    def evaluate_model(self, device, x_val, y_val, y_scaler):
+    def evaluate_model(self, x_val, y_val, y_scaler):
         self.model.eval()
         with torch.no_grad():
             # numpy array as tensor
-            x_val = torch.as_tensor(x_val).float().to(device)
-            y_val = torch.as_tensor(y_val).float().to(device)
+            x_val = torch.as_tensor(x_val).float().to(self.device)
+            y_val = torch.as_tensor(y_val).float().to(self.device)
 
             # calculate validation loss
             x_prediction = self.model(x_val)
@@ -57,10 +57,17 @@ class BatteryModel:
 
             actual_y = y_scaler.inverse_transform(actual)
             predicted_y = y_scaler.inverse_transform(predicted)
-
-
-        torch.save(self.model.state_dict(), "battery_model.pt")
         return actual_y, predicted_y, val_loss
+
+
+
+    def save(self, path):
+        torch.save(self.model.state_dict(), path)
+
+    def load(self, path):
+        self.model.load_state_dict(torch.load(path, map_location=self.device))
+        self.model.eval()
     
+
 
     

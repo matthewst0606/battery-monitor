@@ -78,36 +78,15 @@ class MemoryService: ObservableObject {
     
     
     private func logMemoryInfo() {
-        do {
-            let url = try appDataDirectory(fileName: "memory.csv")
-
-            // formatting the date
-            let formatter = DateFormatter()
-            formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
-            let timestamp = formatter.string(from: Date())
-
-            let totalGB = String(format: "%.0f", info?.total ?? 0)
-            let usedGB = String(format: "%.2f",info?.used ?? 0)
-            let cachedGB = String(format: "%.2f",info?.cached ?? 0)
-            let availableGB = String(format: "%.2f",info?.available ?? 0)
-            
-            let row = "\(timestamp), \(totalGB), \(usedGB), \(cachedGB), \(availableGB)\n"
-            
-            if !FileManager.default.fileExists(atPath: url.path) {
-                try? "timestamp, totalGB, usedGB, cachedGB, availableGB\n"
-                    .write(to: url, atomically: true, encoding: .utf8)
-            }
-            
-            if let handle = try? FileHandle(forWritingTo: url) {
-                _ = try? handle.seekToEnd()
-                handle.write(row.data(using: .utf8)!)
-                try? handle.close()
-            }
-            
-        }
-        catch {
-            print("failed to write memory log!")
-        }
+        let values = [
+            logTimestamp(),
+            String(format: "%.0f", info?.total ?? 0),
+            String(format: "%.2f",info?.used ?? 0),
+            String(format: "%.2f",info?.cached ?? 0),
+            String(format: "%.2f",info?.available ?? 0),
+        ]
+        
+        logToCSV("memory.csv", values)
     }
 }
 

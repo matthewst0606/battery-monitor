@@ -19,7 +19,7 @@ struct StatsTabView: View {
     private var MemoryTab: some View { MemoryTabView() }
     private var BatteryTab: some View { BatteryTabView() }
     private var ProcessTab: some View { ProcessTabView() }
-    private var ThisMac: some View { ThisMacView() }
+    private var ThisMac: some View { ThisMacView(selectedStat: $selectedStat) }
 
     var body: some View {
         VStack(alignment: .center, spacing: 10) {
@@ -32,7 +32,6 @@ struct StatsTabView: View {
                 createTab(title: "Process", tag: "process", selectedStat: $selectedStat)
             }
             .frame(minWidth: 300, maxWidth: 500)
-
 
             switch selectedStat {
             case "batt":    BatteryTab

@@ -1,5 +1,6 @@
 import psutil
 import subprocess
+import sys
 
 class GetBatteryData:
     def __init__(self):
@@ -10,6 +11,25 @@ class GetBatteryData:
         self.system_info = self.get_system_info()
         self.process_dict = self.get_process_info()
         self.powermetrics_dict = self.get_powermetrics_info()
+
+
+    def get_info(self):
+        values = {
+            "system_info": self.system_info,
+            "process_info": self.process_dict,
+            "powermetrics_info": self.powermetrics_dict
+        }
+
+        for name, value in values.items():
+            if value is None:
+                print(f"Error occurred: {name} is missing...")
+                sys.exit()
+
+        return (
+            values["system_info"],
+            values["process_info"],
+            values["powermetrics_info"]
+        )
 
 
     # a dictionary containing general system info
