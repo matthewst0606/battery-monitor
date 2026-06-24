@@ -1,68 +1,156 @@
-# MacOS Battery Monitor
+# macOS Battery Monitor
+
+A macOS menu bar app for monitoring battery status, system usage, and estimated battery life.
+
+## Menu Bar Icon
+
+<img src="screenshots/Menu Bar Preview.gif" alt="Battery Monitor menu bar preview" width="500">
+
+The menu bar icon dynamically displays the current estimated battery time remaining or time until fully charged.
+
+### Features
+
+- Displays estimated time remaining on battery
+
+- Displays estimated time until full charge while charging
+
+- Shows battery percentage, time remaining, and battery health on click
+
+- Provides quick access to the main app window
+
+- Provides quick access to the settings window
+
+## Main App
+
+### Stats Tab
+
+<img src="screenshots/Stats Menu Preview.gif" alt="Battery Monitor stats tab preview" width="500">
 
 
-## Features
-### Menu Bar Icon
-- adds a menubar icon that dyanmically displays the  
-current estimated time remaining on battery and to full charge
-- shows battery percent, time remaining remaining, and battery health on click
-- button for accessing the main app window for a more detailed overview
-- button for accessing settings window for customization
+#### Battery
 
-### Main App
-#### Battery 
-- Displays: current charge, battery health, cycle count, and the models current battery prediction
+Displays:
+
+- Battery level
+
+- Time remaining
+
+- Power source
+
+- Battery temperature
+
+- Low power mode status
+
+- Charging status
 
 #### CPU
-- Displays: CPU usage, idle, power, frequency, and residency
-#### GPU
-- Displays: GPU usage, idle, power, frequency, and residency
+
+Displays:
+
+- CPU usage
+
+- User percentage
+
+- System percentage
+
+- Idle percentage
+
+
+
 #### Memory
-- Displays: Total memory and used memory
+
+Displays:
+
+- Total memory
+
+- Cached memory
+
+- Used memory
+
+- Available memory
+
 #### Processes
-- Displays: 
-  - the number of processes, process power, and the number of running processes
 
-### Settings
-#### Customization
-- System, dark, and light modes.
-- Default or compact menu bar view.
-- Customizable app accept color.
+Displays:
+
+- The top 12 processes that are currently using the most energy
+
+---
+
+### Powermetrics Tab
+
+<img src="screenshots/Model Preview.gif" alt="Battery Monitor powermetrics tab preview" width="500">
+
+#### Battery
+
+Displays:
+
+- Current charge
+
+- Battery health
+
+- Cycle count
+
+- Model-based battery prediction
 
 
-## Screenshots
+#### CPU
+
+Displays:
+
+- CPU usage
+
+- CPU idle percentage
+
+- CPU power
+
+- CPU frequency
+
+- CPU residency
+
+#### GPU
+
+Displays:
+
+- GPU usage
+
+- GPU idle percentage
+
+- GPU power
+
+- GPU frequency
+
+- GPU residency
+
+#### Memory
+
+Displays:
+
+- Total memory
+
+- Used memory
 
 
+#### Processes
 
+Displays:
 
-<table>
-  <tr>
-    <td>
-      <strong>Menubar Icon</strong><br>
-      <img src="screenshots/image1.png" width="250">
-    </td>
-    <td>
-      <strong>On Click</strong><br>
-      <img src="screenshots/image.png" width="250">
-    </td>
-  </tr>
-      <td>
-      <strong>General</strong><br>
-      <img src="screenshots/image3.png" width="250">
-    </td>
-        <td>
-      <strong>Customization</strong><br>
-      <img src="screenshots/image4.png" width="250">
-    </td>
-  <tr>
-    </tr>
-      <td>
-      <strong>Battery Details</strong><br>
-      <img src="screenshots/image5.png" width="250">
-    </td>
-        <td>
-      <strong>CPU Details</strong><br>
-      <img src="screenshots/image6.png" width="250">
-    </td>
-  </tr>
-</table>
+- Total number of processes
+
+- Process power
+
+- Number of running processes
+
+---
+
+## Settings
+
+<img src="screenshots/Settings Preview.gif" alt="Battery Monitor settings preview" width="500">
+
+### Customization
+
+- System, dark, and light appearance modes
+
+- Default or compact menu bar view
+
+- Customizable app accent color
