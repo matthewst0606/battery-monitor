@@ -69,8 +69,7 @@ with torch.no_grad():
 
 
 features = df[FEATURE_COLUMNS].iloc[-1].to_dict()
-prediction = int(current_prediction[0][0])
-
+prediction = max(0, int(current_prediction[0][0]))
 
 result = {
     "features": features,

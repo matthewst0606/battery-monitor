@@ -13,16 +13,16 @@ def data_file(file_name):
 
     raise FileNotFoundError(f"Could not find {file_name}")
 
-def read_data_csv(file_name):
+def read_data_csv(file_name, allow_empty=False):
     dataframe = pd.read_csv(data_file(file_name), skipinitialspace=True)
-    if dataframe.empty:
+    if dataframe.empty and not allow_empty:
         raise ValueError(f"{file_name} does not contain any data rows")
     return dataframe
     
 
 class CSVLogger:
     def __init__(self, process_info, powermetrics_info):
-        self.system_df = read_data_csv("system_info.csv")
+        self.system_df = read_data_csv("system_info.csv", allow_empty=True)
         self.battery_df = read_data_csv("battery.csv")
         self.cpu_df = read_data_csv("cpu.csv")
         self.memory_df = read_data_csv("memory.csv")
@@ -41,12 +41,13 @@ class CSVLogger:
             "Time_Remaining":    self.battery_df["timeRemaining"].iloc[-1],
             "Battery_Condition": self.battery_df["batteryCondition"].iloc[-1],
             "Maximum_Capacity":  self.battery_df["batteryHealth"].iloc[-1],
+
+            "Process_Count": system_info["Process_Count"],
             "Cycle_Count":       self.battery_df["cycleCount"].iloc[-1],
             "Charging":          self.battery_df["isCharging"].iloc[-1],
             "Low_Power_Mode":    self.battery_df["powerMode"].iloc[-1],
 
             # process cols
-            "Process_Count": system_info["Process_Count"],
             "Process_Power": round(self.process_df["POWER"].sum(), 2),
             "Process_State": self.process_df["STATE"].sum(),
 
@@ -75,8 +76,8 @@ class CSVLogger:
         }
             
         # adds the new row to the system_info.csv file
-        new_df_row = pd.DataFrame([new_row])
-        pd.DataFrame([new_row]).to_csv(
+        new_df_row = pd.DataFrame([new_row], columns=self.system_df.columns)
+        new_df_row.to_csv(
             data_file("system_info.csv"),
             mode="a",
             header=False,

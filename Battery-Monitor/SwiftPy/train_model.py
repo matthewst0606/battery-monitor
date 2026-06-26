@@ -10,6 +10,7 @@ from battery_model import BatteryModel
 
 df = pd.read_csv(DATA_DIR / "system_info.csv")
 df = df.dropna(subset=FEATURE_COLUMNS + TARGET_COLUMN)
+df = df[df["Time_Remaining"] > 0]
 
 # --- initialize scalers ---
 def init_scalers():

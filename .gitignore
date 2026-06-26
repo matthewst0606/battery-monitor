@@ -1,8 +1,11 @@
-
-
 .DS_Store
 .vscode/
 .build/
-Battery-Monitor.xcodeproj/
-Battery-Monitor/SwiftPy/Data/*.csv
+
+*.xcuserstate
+*.xcuserdata/
+xcuserdata/
+
+Battery-Monitor/SwiftPy/data/*.csv
+
 ignore.md
