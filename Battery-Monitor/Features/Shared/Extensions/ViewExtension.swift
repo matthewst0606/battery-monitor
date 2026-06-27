@@ -23,7 +23,11 @@ extension View {
     }
     
 
-    
+    func loading() -> some View {
+        HStack(alignment: .center) {
+            Text("Loading...").standard()
+        }.frame(maxWidth: .infinity)
+    }
     
     func createTab(
         _ title: String,
@@ -44,11 +48,14 @@ extension View {
             val: selectedStat.wrappedValue,
             isSelected: selectedStat.wrappedValue == tag
         )
+        .hoverAnimation()
+
     }
 
     
     func settingsButton(
-        _ buttonLabel: String, 
+        _ buttonLabel: String,
+        tag: String,
         action: @escaping () -> Void
     ) -> some View {
         Button { action() }
@@ -59,5 +66,14 @@ extension View {
         }
         .buttonStyle(.glass)
         .buttonBorderShape(.capsule)
+        .hoverAnimation()
+        
     }
+    
+    func hoverAnimation() -> some View {
+        modifier(HoverAnimationModifier())
+    }
+    
+
 }
+

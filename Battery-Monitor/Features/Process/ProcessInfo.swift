@@ -6,8 +6,8 @@
 //
 
 struct RunningProcess: Identifiable {
-    var id: Int { pid }
-    var pid: Int
+    var id: String { pid }
+    var pid: String
     var command: String
     var state: String
     var power: String

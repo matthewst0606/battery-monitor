@@ -35,14 +35,9 @@ class ProcessService: ObservableObject {
         process.standardError = pipe
         
         do {
-            
             try process.run()
-//            process.waitUntilExit()
-            
             let data = pipe.fileHandleForReading.readDataToEndOfFile()
-            
             return String(data: data, encoding: .utf8) ?? ""
-            
         } catch {
             return "Error: \(error.localizedDescription)"
         }
@@ -84,7 +79,7 @@ class ProcessService: ObservableObject {
         
         
         return RunningProcess(
-            pid: pid,
+            pid: String(pid),
             command: String(parts[1]),
             state: String(parts[2]),
             power: String(parts[3])

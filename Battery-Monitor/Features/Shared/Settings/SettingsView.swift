@@ -10,6 +10,7 @@ struct SettingsView: View {
     private var CustomizeTab: some View { CustomizeTabView() }
     private var GeneralTab: some View { GeneralTabView() }
 
+    @State private var isHovering = false
 
     var body: some View {
         // create the tabs that are displayed at the top of the settings page
@@ -31,9 +32,11 @@ struct SettingsView: View {
                     }
                     
                     HStack {
-                        settingsButton("Clear Data") { NSApp.terminate(nil) }
-                        settingsButton("Quit App") { NSApp.terminate(nil) }
+                        settingsButton("Clear Data", tag: "clear") { NSApp.terminate(nil) }
+
+                        settingsButton("Quit App", tag: "quit") { NSApp.terminate(nil) }
                     }
+                
                 }
                 .windowTabStyle("Settings")
             

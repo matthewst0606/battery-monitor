@@ -9,6 +9,35 @@ import SwiftUI
 import Charts
 import Combine
 
+struct MetricRow: Identifiable {
+    let id: String
+    let title: String
+    let value: String
+    let color: Color
+    let chart: StatChart?
+    let visibilityKey: String?
+
+    init(
+        id: String? = nil,
+        title: String,
+        value: String,
+        color: Color = .primary,
+        chart: StatChart? = nil,
+        visibilityKey: String? = nil
+    ) {
+        self.id = id ?? title
+        self.title = title
+        self.value = value
+        self.color = color
+        self.chart = chart
+        self.visibilityKey = visibilityKey
+    }
+
+    var isVisible: Bool {
+        guard let visibilityKey else { return true }
+        return UserDefaults.standard.object(forKey: visibilityKey) as? Bool ?? true
+    }
+}
 
 struct MetricChart {
     var selectedChart: Binding<StatChart?>
@@ -24,13 +53,37 @@ struct MetricChart {
             chartPoints: chartPoints
         )
     }
+
+    @ViewBuilder
+    func row(_ metric: MetricRow) -> some View {
+        if metric.isVisible {
+            if let chart = metric.chart {
+                ChartableMetricRow(
+                    title: metric.title,
+                    value: metric.value,
+                    color: metric.color,
+                    chart: chart,
+                    selectedChart: selectedChart,
+                    chartPoints: chartPoints
+                )
+            } else {
+                HStack {
+                    Text(metric.title)
+                    Spacer()
+                    Text(metric.value)
+                        .font(.system(size: 12, weight: .bold))
+                        .foregroundStyle(metric.color)
+                }
+                .standardPadding()
+            }
+        }
+    }
 }
 
 
 // A row that can expand to show its chart.
 // e.g. battery level, cpu usage, etc.
 struct ChartableMetricRow: View {
-    
     let title: String
     let value: String
     let color: Color
@@ -49,8 +102,7 @@ struct ChartableMetricRow: View {
                     .font(.system(size: 12, weight: .bold))
                     .foregroundStyle(color)
             }
-            .padding(.vertical, 7)
-            .padding(.horizontal, 10)
+            .standardPadding()
         }
         .buttonStyle(.accessoryBar)
 

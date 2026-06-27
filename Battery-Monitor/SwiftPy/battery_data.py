@@ -37,8 +37,22 @@ class GetBatteryData:
     def get_system_info(self):
         memory = psutil.virtual_memory()
         self.system_info['CPU_Usage'] = psutil.cpu_percent()
-        self.system_info['Process_Count'] = len(psutil.pids())
+        self.system_info['Process_Count'] = self.get_process_count()
         return self.system_info
+
+
+    def get_process_count(self):
+        try:
+            return len(psutil.pids())
+        except PermissionError:
+            try:
+                process_output = subprocess.check_output(
+                    ["/bin/ps", "-axo", "pid="],
+                    text=True
+                )
+                return len(process_output.splitlines())
+            except (PermissionError, subprocess.CalledProcessError):
+                return 0
 
 
 
@@ -66,10 +80,18 @@ class GetBatteryData:
             if " " in index:
                 pid, rest = index.split(" ", 1)
                 pid, rest = pid.strip(), rest.strip()
+                if not pid.isdigit():
+                    continue
 
                 parts = rest.rsplit(None, 2)
+                if len(parts) < 3:
+                    continue
                 state = parts[1]
                 power = parts[2]
+                try:
+                    float(power)
+                except ValueError:
+                    continue
 
 
                 process_dict[pid] = {

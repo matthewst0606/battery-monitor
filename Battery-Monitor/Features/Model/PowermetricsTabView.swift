@@ -14,30 +14,14 @@ struct PowermetricsTabView: View {
     
     @AppStorage("selectedColor") private var selectedColorData: Data = Data()
     @State private var selectedAccentColor: Color = .accentColor
-
-    @State private var selectedStat = "batt"
     @State private var selectedPowermetrics = "batt"
     
     // powermetrics page tabs
-    private var BatteryPowermetrics: some View {
-        BatteryPowermetricsView()
-            .environmentObject(model)
-    }
-    private var CPUPowermetrics: some View {
-        CPUPowermetricsView()
-            .environmentObject(model)
-    }
-    private var MemoryPowermetrics: some View {
-        MemoryPowermetricsView()
-    }
-    private var GPUView: some View {
-        GpuTabView()
-            .environmentObject(model)
-    }
-    private var ProcessesView: some View {
-        ProcessesTabView()
-            .environmentObject(model)
-    }
+    private var BatteryPowermetrics: some View { BatteryPowermetricsView() }
+    private var CPUPowermetrics: some View { CPUPowermetricsView() }
+    private var MemoryPowermetrics: some View { MemoryPowermetricsView() }
+    private var GPUView: some View { GpuTabView() }
+    private var ProcessesView: some View { ProcessesTabView() }
         
     
     var ModelPredictionView: some View {
@@ -50,9 +34,7 @@ struct PowermetricsTabView: View {
                 .padding(EdgeInsets(top: 2, leading: 0, bottom:  2, trailing: 0))
                 .imageScale(.large)
                 .foregroundStyle(Color.primary, Color.dataToColor(from: selectedColorData) ?? selectedAccentColor)
-            
 
-    
         }
         .padding(.vertical, 10)
         .frame(minWidth: 300, maxWidth: 500)
@@ -64,7 +46,6 @@ struct PowermetricsTabView: View {
     var body: some View {
         VStack(alignment: .center, spacing: 10) {
             ModelPredictionView
-            
             
             HStack {
                 createTab("Battery", tag: "batt", $selectedPowermetrics)

@@ -80,6 +80,10 @@ class CPUService: ObservableObject {
     
     
     
+    /* calls getRawCPUInfo
+     
+   
+     */
     func getProcessorInfo() -> CPUInfo? {
         guard let info = getRawCPUInfo() else { return nil }
         

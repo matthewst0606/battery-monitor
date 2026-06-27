@@ -14,6 +14,7 @@ extension VStack {
             .padding(.vertical, 5)
             .background(.clear)
             .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+
     }
     
     func windowTabStyle(_ title: String) -> some View {

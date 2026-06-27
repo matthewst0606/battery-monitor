@@ -4,10 +4,7 @@
 //
 //  Created by Matt on 6/25/26.
 //
-
 import Foundation
-
-
 
 struct BatteryInfo {
     var batteryLevel: Int

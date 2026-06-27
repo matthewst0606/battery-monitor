@@ -23,6 +23,12 @@ struct CustomizeTabView: View {
 
     @State private var colorPickerColor: Color = .blue
     
+    @State private var selectedStat = ""
+
+    
+
+
+    
     
     private func createColorPicker(_ title: String, selection: Binding<Color>) -> some View {
         VStack {
@@ -56,8 +62,7 @@ struct CustomizeTabView: View {
                         }.padding()
                     }
                 }
-                
-                
+
                 HStack {
                     createColorPicker(
                         "Accent Color",
@@ -65,7 +70,8 @@ struct CustomizeTabView: View {
                         
                     )
                     
-                    settingsButton("Apply") {
+  
+                    settingsButton("Apply", tag: "apply") {
                         if let data = colorPickerColor.colorToData() {
                             selectedColorData = data
                         }
@@ -78,4 +84,6 @@ struct CustomizeTabView: View {
         .appTabStyle()
     }
 }
+
+
 

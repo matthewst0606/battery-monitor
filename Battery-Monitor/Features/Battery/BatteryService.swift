@@ -137,6 +137,8 @@ class BatteryService: ObservableObject {
     
     // appends the new battery info to battery.csv
     private func logBatteryInfo(_ info: BatteryInfo) {
+        guard info.timeRemaining > 0 else { return }
+
         let values = [
             logCSVTimestamp(),
             String(info.batteryLevel),

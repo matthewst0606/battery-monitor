@@ -41,7 +41,7 @@ class CSVLogger:
             "Time_Remaining":    self.battery_df["timeRemaining"].iloc[-1],
             "Battery_Condition": self.battery_df["batteryCondition"].iloc[-1],
             "Maximum_Capacity":  self.battery_df["batteryHealth"].iloc[-1],
-
+            
             "Process_Count": system_info["Process_Count"],
             "Cycle_Count":       self.battery_df["cycleCount"].iloc[-1],
             "Charging":          self.battery_df["isCharging"].iloc[-1],
@@ -99,8 +99,14 @@ class CSVLogger:
             }
             rows.append(new_row)
 
-            process_df = pd.DataFrame(rows)
-            process_df.to_csv(data_file("system_processes.csv"), index=False)
+        if not rows:
+            rows.append({
+                "POWER": 0.0,
+                "STATE": 0
+            })
+
+        process_df = pd.DataFrame(rows)
+        process_df.to_csv(data_file("system_processes.csv"), index=False)
 
         return process_df
 
@@ -109,6 +115,9 @@ class CSVLogger:
     # creates the data in data/cpu_usage
     def cpu_row(self, powermetrics_info):
         rows = []
+        if "core Power" not in powermetrics_info["cpu"]:
+            return read_data_csv("cpu_usage.csv")
+
         cpu_power = float(powermetrics_info["cpu"]["core Power"][0][2])
 
         for name, info in powermetrics_info['cpu'].items():
@@ -132,6 +141,9 @@ class CSVLogger:
     # creates the data in data/gpu_usage
     def gpu_row(self, powermetrics_info):
         rows = []
+        if "Power" not in powermetrics_info["gpu"]:
+            return read_data_csv("gpu_usage.csv")
+
         gpu_power =  powermetrics_info['gpu']['Power'][0][2]
         active_frequency =  powermetrics_info['gpu']['HW'][0][4]
         active_residency = powermetrics_info['gpu']['HW'][1][4]

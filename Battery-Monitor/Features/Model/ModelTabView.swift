@@ -9,7 +9,6 @@ import SwiftUI
 
 struct ModelTabView: View {
     @EnvironmentObject var model: ModelService
-
     
     var body: some View {
         VStack {
@@ -18,20 +17,26 @@ struct ModelTabView: View {
                     .standard()
                     .padding(.vertical, 15)
             }
-            .frame(minWidth: 500, maxWidth: 500, alignment: .top)
-            .background(.bar)
-            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+            .logsSpacing()
             
             ScrollView {
                 Text(model.modelOutput)
                     .standard()
                     .textSelection(.enabled)
             }
-            .frame(minWidth: 500, maxWidth: 500, alignment: .top)
-            .background(.bar)
-            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+            .logsSpacing()
+
         }
         .windowTabStyle("Model Output")
         .navigationTitle(Text("Model Output"))
+    }
+}
+
+private extension View {
+    func logsSpacing() -> some View {
+        self
+        .frame(minWidth: 500, maxWidth: 500, alignment: .top)
+        .background(.bar)
+        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
     }
 }

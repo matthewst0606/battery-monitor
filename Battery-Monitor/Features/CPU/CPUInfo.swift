@@ -6,6 +6,7 @@
 //
 import MachO
 
+
 struct CPUInfo {
     var activeCores: Double
     var user: Double

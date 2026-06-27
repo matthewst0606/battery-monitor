@@ -14,3 +14,18 @@ extension Toggle {
             .toggleStyle(.switch)
     }
 }
+
+struct AppStorageToggle: View {
+    let title: String
+    @AppStorage private var isOn: Bool
+
+    init(_ title: String, key: String, defaultValue: Bool = true) {
+        self.title = title
+        self._isOn = AppStorage(wrappedValue: defaultValue, key)
+    }
+
+    var body: some View {
+        Toggle(title, isOn: $isOn)
+    }
+}
+

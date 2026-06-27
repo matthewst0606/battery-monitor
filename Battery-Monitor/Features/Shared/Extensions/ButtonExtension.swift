@@ -26,4 +26,20 @@ extension Button {
                 .animation(.easeInOut, value: val)
         }
     }
+    
+    
+
+}
+
+struct HoverAnimationModifier: ViewModifier {
+    @State private var isHovering = false
+
+    func body(content: Content) -> some View {
+        content
+            .scaleEffect(isHovering ? 1.06 : 1.0)
+            .animation(.bouncy, value: isHovering)
+            .onHover { hovering in
+                isHovering = hovering
+            }
+    }
 }
