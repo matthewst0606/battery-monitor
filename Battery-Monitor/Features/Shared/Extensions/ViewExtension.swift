@@ -5,30 +5,24 @@
 //  Created by Matt on 6/1/26.
 //
 import SwiftUI
+import SwiftfulLoadingIndicators
+
+// a standard loading screen
+struct LoadingScreen: View {
+    
+    var body: some View {
+            HStack(alignment: .center) {
+                Text("Loading")
+                LoadingIndicator(animation: .threeBalls, size: .small)
+                
+            }.frame(maxWidth: .infinity)
+    }
+}
+
 
 extension View {
-    func ListItem(
-        _ title: String,
-        value: String,
-        color: Color,
-    ) -> some View {
-        return HStack {
-            Text(title)
-            Spacer()
-            Text(value)
-                .font(.system(size: 12, weight: .bold))
-                .foregroundStyle(color)
-        }
-        .standardPadding()
-    }
-    
-
-    func loading() -> some View {
-        HStack(alignment: .center) {
-            Text("Loading...").standard()
-        }.frame(maxWidth: .infinity)
-    }
-    
+    // creates a button tab
+    // e.g. stats, powermetrics
     func createTab(
         _ title: String,
         tag: String,
@@ -52,7 +46,8 @@ extension View {
 
     }
 
-    
+    // the standard format for buttons
+    // in the settings view
     func settingsButton(
         _ buttonLabel: String,
         tag: String,
@@ -70,10 +65,8 @@ extension View {
         
     }
     
+    // a hovering animation for buttons
     func hoverAnimation() -> some View {
         modifier(HoverAnimationModifier())
     }
-    
-
 }
-

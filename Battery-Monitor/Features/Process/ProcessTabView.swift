@@ -15,14 +15,42 @@ struct ProcessesTabView: View {
         VStack(spacing: 5) {
             List {
                 if let result = model.result {
-                    ListItem("Number of Processes:", value: "\(result.numOfProcesses)", color: .primary)
-                    ListItem("Process Power:", value: "\(result.processPower, default: "%.2f")", color: .primary)
-                    ListItem("Running Processes:", value: "\(result.processState)", color: .primary)
+                    ForEach(listItems(for: result)) { metric in
+                        ListItem(
+                            title: metric.title,
+                            value: metric.value,
+                            color: metric.color
+                        )
+                    }
                 }
-                else { loading() }
+                else { LoadingScreen() }
 
             }.unscrollableListStyle()
-        }.appTabStyle()
+        }.smallPanelStyle()
+    }
+    
+    // -------------------------
+    // ===== Standard Rows =====
+    // -------------------------
+    private func listItems(for result: PythonResult) -> [MetricRow] {
+        [
+            MetricRow(
+                title: "Number of Processes",
+                value: "\(result.numOfProcesses)",
+                color: .primary,
+            ),
+            MetricRow(
+                title: "Process Power",
+                value: "\(result.processPower, default: "%.2f")",
+                color: .primary,
+            ),
+            MetricRow(
+                title: "Running Processes",
+                value: "\(result.processState)",
+                color: .primary,
+            ),
+        ]
+        
     }
 }
 
@@ -32,55 +60,71 @@ struct ProcessTabView: View {
 
     var body: some View {
         VStack(spacing: 5) {
-            HStack {
-                Text("Process")
-                    .standard()
-                    .frame(maxWidth: 150, alignment: .leading)
-
-                Text("PID")
-                    .standard()
-                    .frame(maxWidth: .infinity, alignment: .leading)
-
-                Text("Power")
-                    .standard()
-                    .frame(width: 70, alignment: .trailing)
-
-                Text("State")
-                    .standard()
-                    .frame(width: 80, alignment: .trailing)
-            }
-            .standardPadding()
+            processHeader()
             
             List(process.processes) { p in
-                HStack {
-                    Text(p.command)
-                        .frame(maxWidth: 150, alignment: .leading)
-                        .foregroundStyle(stateColor(p.state, Double(p.power) ?? -1))
-
-                    Text(p.pid)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .foregroundStyle(stateColor(p.state, Double(p.power) ?? -1))
-
-                    Text(p.power)
-                        .frame(width: 70, alignment: .trailing)
-                        .foregroundStyle(stateColor(p.state, Double(p.power) ?? -1))
-
-
-                    Text(p.state)
-                        .frame(width: 80, alignment: .trailing)
-                        .foregroundStyle(stateColor(p.state, Double(p.power) ?? -1))
-                }
+                processBody(process: p)
             }
             .scrollableListStyle()
             
             
-        }.appTabStyle()
+        }.smallPanelStyle()
+    }
+    
+    private func processHeader() -> some View {
+        return HStack {
+            Text("Process")
+                .standard()
+                .frame(maxWidth: 150, alignment: .leading)
+
+            Text("PID")
+                .standard()
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+            Text("Power")
+                .standard()
+                .frame(width: 70, alignment: .trailing)
+
+            Text("State")
+                .standard()
+                .frame(width: 80, alignment: .trailing)
+        }
+        .standardPadding()
+        .background(.quinary.opacity(0.5))
+        .clipShape(RoundedRectangle(cornerRadius: 20))
+        .frame(height:25)
+        .padding(.vertical, 10)
+
+
+    }
+    
+    private func processBody(process: RunningProcess) -> some View {
+        return HStack {
+            let power = Double(process.power) ?? -1
+            
+            Text(process.command)
+                    .frame(maxWidth: 150, alignment: .leading)
+                    .foregroundStyle(stateColor(process.state, power))
+            
+            Text(process.pid)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .foregroundStyle(stateColor(process.state, power))
+            
+            Text(process.power)
+                .frame(width: 70, alignment: .trailing)
+                .foregroundStyle(stateColor(process.state, power))
+            
+            Text(process.state)
+                .frame(width: 80, alignment: .trailing)
+                .foregroundStyle(stateColor(process.state, power))
+            
+        }
     }
     
     private func stateColor(_ value: String, _ power: Double) -> Color {
         switch value {
         case "sleeping": return powerColor(power).opacity(0.5)
-        default: return .primary
+        default:         return powerColor(power)
         }
     }
     

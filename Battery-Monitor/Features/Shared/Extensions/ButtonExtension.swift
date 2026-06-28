@@ -9,26 +9,17 @@ import SwiftUI
 
 extension Button {
     func tabBarButton(val: String, isSelected: Bool) -> some View {
-        if isSelected {
-            self
-                .buttonStyle(.glass(.clear))
-                .buttonSizing(.flexible)
-                .background(.blue.opacity(0.5), in: .capsule)
-                .buttonBorderShape(.roundedRectangle)
-                .animation(.easeInOut, value: val)
-        }
-        else {
-            self
-                .buttonStyle(.glass(.regular))
-                .buttonSizing(.flexible)
-                .background(.clear, in: .capsule)
-                .buttonBorderShape(.roundedRectangle)
-                .animation(.easeInOut, value: val)
-        }
+        self
+            .buttonStyle(.glass(isSelected ? .clear : .regular))
+            .buttonSizing(.flexible)
+            .background(
+                isSelected ? .blue.opacity(0.5) : .clear,
+                in: .capsule
+            )
+        
+            .buttonBorderShape(.roundedRectangle(radius: 10))
+            .animation(.easeInOut, value: isSelected)
     }
-    
-    
-
 }
 
 struct HoverAnimationModifier: ViewModifier {
@@ -36,10 +27,12 @@ struct HoverAnimationModifier: ViewModifier {
 
     func body(content: Content) -> some View {
         content
-            .scaleEffect(isHovering ? 1.06 : 1.0)
+            .scaleEffect(isHovering ? 1.08 : 1.0)
             .animation(.bouncy, value: isHovering)
             .onHover { hovering in
                 isHovering = hovering
             }
     }
 }
+
+

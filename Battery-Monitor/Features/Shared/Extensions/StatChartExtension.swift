@@ -19,15 +19,6 @@ extension StatChart {
         color: .secondary,
     )
 
-    static let maxCapacity = StatChart(
-        id: "battery.health",
-        fileName: "battery.csv",
-        valueColumn: 2,
-        yAxisLabel: "Percent",
-        yAxisDomain: 0...100,
-        color: .secondary,
-    )
-
     static let batteryTimeRemaining = StatChart(
         id: "battery.timeRemaining",
         fileName: "battery.csv",

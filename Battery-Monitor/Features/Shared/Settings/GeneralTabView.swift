@@ -62,7 +62,7 @@ struct GeneralTabView: View {
             
             
         }
-        .appTabStyle()
+        .smallPanelStyle()
         
         .onChange(of: selectedUpdateInterval) {
             timerService.createTimer {

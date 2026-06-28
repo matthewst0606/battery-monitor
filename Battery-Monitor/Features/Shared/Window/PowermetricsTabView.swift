@@ -22,30 +22,22 @@ struct PowermetricsTabView: View {
     private var MemoryPowermetrics: some View { MemoryPowermetricsView() }
     private var GPUView: some View { GpuTabView() }
     private var ProcessesView: some View { ProcessesTabView() }
-        
-    
-    var ModelPredictionView: some View {
-        VStack {
-            Text("Model Predictions")
-                .padding(EdgeInsets(top: 2, leading: 0, bottom:  2, trailing: 0))
-                .font(.system(size: 18, weight: .bold))
-            
-            Image(systemName: "arrow.trianglehead.2.clockwise.rotate.90")
-                .padding(EdgeInsets(top: 2, leading: 0, bottom:  2, trailing: 0))
-                .imageScale(.large)
-                .foregroundStyle(Color.primary, Color.dataToColor(from: selectedColorData) ?? selectedAccentColor)
 
-        }
-        .padding(.vertical, 10)
-        .frame(minWidth: 300, maxWidth: 500)
-        .background(.background)
-        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-    }
-    
     
     var body: some View {
         VStack(alignment: .center, spacing: 10) {
-            ModelPredictionView
+            VStack {
+                List {
+                    header()
+                }
+                .unscrollableListStyle()
+                .frame(minWidth: 300, maxWidth: 500)
+                .frame(height: 100)
+                
+
+            }
+            
+            
             
             HStack {
                 createTab("Battery", tag: "batt", $selectedPowermetrics)
@@ -55,6 +47,7 @@ struct PowermetricsTabView: View {
                 createTab("Processes", tag: "processes", $selectedPowermetrics)
             }
             .frame(minWidth: 300, maxWidth: 500)
+                
 
             switch selectedPowermetrics {
             case "batt":  BatteryPowermetrics.environmentObject(model)
@@ -65,7 +58,21 @@ struct PowermetricsTabView: View {
             default: BatteryPowermetrics
             }
         }
+        .windowPanelStyle("Powermetrics")
 
+    }
+    
+    private func header() -> some View {
+        return HStack {
+            Text("Model Predictions")
+                .padding(.vertical, 25)
+                .font(.system(size: 18, weight: .bold))
+            
+            Image(systemName: "power.circle")
+                .imageScale(.large)
+                .foregroundStyle(Color.primary, Color.dataToColor(from: selectedColorData) ?? selectedAccentColor)
+        }
+        .frame(maxWidth: .infinity, alignment: .center)
     }
     
 }

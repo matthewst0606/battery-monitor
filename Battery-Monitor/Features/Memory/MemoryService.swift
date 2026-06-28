@@ -85,7 +85,6 @@ class MemoryService: ObservableObject {
             String(format: "%.2f",info?.cached ?? 0),
             String(format: "%.2f",info?.available ?? 0),
         ]
-        
         logToCSV("memory.csv", values)
     }
 }

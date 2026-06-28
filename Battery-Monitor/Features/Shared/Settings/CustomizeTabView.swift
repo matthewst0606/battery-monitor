@@ -81,7 +81,7 @@ struct CustomizeTabView: View {
             .unscrollableListStyle()
              
         }
-        .appTabStyle()
+        .smallPanelStyle()
     }
 }
 

@@ -38,7 +38,7 @@ struct SettingsView: View {
                     }
                 
                 }
-                .windowTabStyle("Settings")
+                .windowPanelStyle("Settings")
             
 
     

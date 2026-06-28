@@ -8,6 +8,10 @@
 import SwiftUI
 import Combine
 
+
+// ---------------------------------------------------------
+//  ===== Memory Powermetrics View in Powermetrics tab =====
+//  --------------------------------------------------------
 struct MemoryPowermetricsView: View {
     @EnvironmentObject var model: ModelService
 
@@ -16,13 +20,17 @@ struct MemoryPowermetricsView: View {
             List {
                 if let result = model.result {
                     ForEach(listItems(for: result)) { metric in
-                        ListItem(metric.title, value: metric.value, color: metric.color)
+                        ListItem(
+                            title: metric.title,
+                            value: metric.value,
+                            color: metric.color
+                        )
                     }
                 }
-                else { loading() }
+                else { LoadingScreen() }
 
             }.unscrollableListStyle()
-        }.appTabStyle()
+        }.smallPanelStyle()
     }
     
     // -------------------------
@@ -46,6 +54,9 @@ struct MemoryPowermetricsView: View {
     
 }
 
+// -----------------------------------------
+//  ===== Memory Tab View in Stats tab =====
+//  ----------------------------------------
 struct MemoryTabView: View {
     @EnvironmentObject var mem: MemoryService
 
@@ -61,10 +72,10 @@ struct MemoryTabView: View {
                         }
                         
                     }
-                    else { loading() }
+                    else { LoadingScreen() }
 
                 }.scrollableListStyle()
-            }.appTabStyle()
+            }.smallPanelStyle()
         }
     }
     
@@ -128,22 +139,4 @@ struct MemoryTabView: View {
         default:    return .green
         }
     }
-}
-
-// -------------------------
-// ===== Menu Toggling =====
-// -------------------------
-struct MemoryMenuView: View {
-    var body: some View {
-        AppStorageToggle("Total Memory", key: MemoryMenuKey.total)
-        AppStorageToggle("Cached Memory", key: MemoryMenuKey.cached)
-        AppStorageToggle("Used Memory", key: MemoryMenuKey.used)
-        AppStorageToggle("Available Memory", key: MemoryMenuKey.available)
-    }
-}
-enum MemoryMenuKey {
-    static let total = "total_memory"
-    static let cached = "cached_memory"
-    static let used = "used_memory"
-    static let available = "available_memory"
 }

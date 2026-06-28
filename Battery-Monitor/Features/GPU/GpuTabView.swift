@@ -7,21 +7,59 @@
 
 import SwiftUI
 
+// ------------------------------------------------------
+//  ===== GPU Powermetrics View in Powermetrics tab =====
+//  -----------------------------------------------------
 struct GpuTabView: View {
     @EnvironmentObject var model: ModelService
-
+    
     var body: some View {
         VStack(spacing: 5) {
             List {
                 if let result = model.result {
-                    ListItem("GPU Usage", value: String(format: "%.2f%%", result.gpuUsage), color: .primary)
-                    ListItem("GPU Idle", value: String(format: "%.2f%%", result.gpuIdle), color: .primary)
-                    ListItem("GPU Power", value: String(format: "%.2f W", result.gpuPower), color: .primary)
-                    ListItem("GPU Frequency", value: String(format: "%.2f Mhz", result.gpuFrequency), color: .primary)
-                    ListItem("GPU Residency", value: String(format: "%.2f%%", result.gpuResidency), color: .primary)
+                    ForEach(listItems(for: result)) { metric in
+                        ListItem(
+                            title: metric.title,
+                            value: metric.value,
+                            color: metric.color
+                        )
+                    }
                 }
-                else { loading() }
+                else { LoadingScreen() }
             }.unscrollableListStyle()
-        }.appTabStyle()
+        }.smallPanelStyle()
+    }
+    
+    // -------------------------
+    // ===== Standard Rows =====
+    // -------------------------
+    private func listItems(for result: PythonResult) -> [MetricRow] {
+        [
+            MetricRow(
+                title: "GPU Usage",
+                value: String(format: "%.2f%%", result.gpuUsage),
+                color: .primary
+            ),
+            MetricRow(
+                title: "GPU Idle",
+                value: String(format: "%.2f%%", result.gpuIdle),
+                color: .primary
+            ),
+            MetricRow(
+                title: "GPU Power",
+                value: String(format: "%.2f W", result.gpuPower),
+                color: .primary
+            ),
+            MetricRow(
+                title: "GPU Frequency",
+                value: String(format: "%.2f Mhz", result.gpuFrequency),
+                color: .primary
+            ),
+            MetricRow(
+                title: "GPU Residency",
+                value: String(format: "%.2f%%", result.gpuResidency),
+                color: .primary
+            ),
+        ]
     }
 }

@@ -11,21 +11,15 @@ import Foundation
 class ProcessService: ObservableObject {
     @Published var info: RunningProcess?
     @Published var processes: [RunningProcess] = []
-
     private let timerService = TimerService()
     
     init() {
         fetchProcesses()
-        
-        timerService.createTimer {
-            self.fetchProcesses()
-        }
+        timerService.createTimer { self.fetchProcesses() }
     }
     
     
-    
     private static func runShellCommand(_ command: String) -> String {
-        
         let process = Process()
         let pipe = Pipe()
         
@@ -36,11 +30,12 @@ class ProcessService: ObservableObject {
         
         do {
             try process.run()
-            let data = pipe.fileHandleForReading.readDataToEndOfFile()
+            let data = pipe
+                .fileHandleForReading
+                .readDataToEndOfFile()
             return String(data: data, encoding: .utf8) ?? ""
-        } catch {
-            return "Error: \(error.localizedDescription)"
         }
+        catch { return "Error: \(error.localizedDescription)" }
     }
     
     
@@ -74,9 +69,7 @@ class ProcessService: ObservableObject {
     
     private static func parseLine(_ line: String) -> RunningProcess? {
         let parts = line.split(separator: " ", omittingEmptySubsequences: true)
-        guard parts.count >= 4,
-              let pid = Int(parts[0]) else { return nil }
-        
+        guard parts.count >= 4, let pid = Int(parts[0]) else { return nil }
         
         return RunningProcess(
             pid: String(pid),
@@ -88,7 +81,9 @@ class ProcessService: ObservableObject {
 
     private static func fetchProcessesRaw() -> [RunningProcess] {
         let raw = runTopProcessesCommand()
-        return raw.components(separatedBy: "\n").compactMap { parseLine($0) }
+        return raw
+            .components(separatedBy: "\n")
+            .compactMap { parseLine($0) }
     }
     
     

@@ -7,14 +7,8 @@
 
 import SwiftUI
 
-extension Toggle {
-    func getToggleStyle() -> some View {
-        self
-            .padding()
-            .toggleStyle(.switch)
-    }
-}
-
+// store the state (on/off) of displayed rows 
+// in the stats tab
 struct AppStorageToggle: View {
     let title: String
     @AppStorage private var isOn: Bool

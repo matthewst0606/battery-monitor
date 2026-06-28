@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		C97A72C82FF17C7A00A9EE62 /* SwiftfulLoadingIndicators in Frameworks */ = {isa = PBXBuildFile; productRef = C97A72C72FF17C7A00A9EE62 /* SwiftfulLoadingIndicators */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		C9A85FD32FD7A4D0008E18FA /* Battery-Monitor.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Battery-Monitor.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -38,6 +42,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C97A72C82FF17C7A00A9EE62 /* SwiftfulLoadingIndicators in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -80,6 +85,7 @@
 			);
 			name = "Battery-Monitor";
 			packageProductDependencies = (
+				C97A72C72FF17C7A00A9EE62 /* SwiftfulLoadingIndicators */,
 			);
 			productName = "Battery-Monitor";
 			productReference = C9A85FD32FD7A4D0008E18FA /* Battery-Monitor.app */;
@@ -109,6 +115,9 @@
 			);
 			mainGroup = C9A85FCA2FD7A4CF008E18FA;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				C97A72C62FF17C7A00A9EE62 /* XCRemoteSwiftPackageReference "SwiftfulLoadingIndicators" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = C9A85FD42FD7A4D0008E18FA /* Products */;
 			projectDirPath = "";
@@ -356,6 +365,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		C97A72C62FF17C7A00A9EE62 /* XCRemoteSwiftPackageReference "SwiftfulLoadingIndicators" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/SwiftfulThinking/SwiftfulLoadingIndicators.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.0.4;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		C97A72C72FF17C7A00A9EE62 /* SwiftfulLoadingIndicators */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C97A72C62FF17C7A00A9EE62 /* XCRemoteSwiftPackageReference "SwiftfulLoadingIndicators" */;
+			productName = SwiftfulLoadingIndicators;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = C9A85FCB2FD7A4CF008E18FA /* Project object */;
 }

@@ -8,24 +8,21 @@
 import SwiftUI
 
 extension Text {
+    // standard text formatting
     func standard() -> some View {
         self
             .font(.system(size: 12, weight: .bold))
             .padding(EdgeInsets(top: 5, leading: 5, bottom:  2, trailing: 5))
     }
     
+    // standard text animation on click
     func textAnimation(isSelected: Bool) -> some View {
-        if isSelected {
-            self
-                .font(.system(size: 14, weight: .bold))
-                .padding(.horizontal, 0)
-                .padding(.vertical, 5)
-        }
-        else {
-            self
-                .font(.system(size: 11, weight: .regular))
-                .padding(.horizontal, 5)
-                .padding(.vertical, 5)
-        }
+        self
+            .font(.system(
+                size: isSelected ? 14: 11,
+                weight: isSelected ? .bold: .regular
+            ))
+            .padding(.horizontal, isSelected ? 0 : 5)
+            .padding(.vertical, 5)  
     }
 }

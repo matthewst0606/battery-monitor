@@ -7,26 +7,41 @@
 import SwiftUI
 import Combine
 
-
+// ----------------------------------------------------------
+//  ===== Battery Powermetrics View in Powermetrics tab =====
+//  ---------------------------------------------------------
 struct BatteryPowermetricsView: View {
     @EnvironmentObject var model: ModelService
     
     var body: some View {
-        VStack(spacing: 5) {
+        VStack(spacing: 10) {
+                
+            List {
+                if let result = model.result {modelSummary(for: result)}
+            }
+            .unscrollableListStyle()
+            .frame(maxHeight: 120)
+            .help("""
+                    A summary of the models predictions. 
+                    It updates relative to the selected time
+                    interval located in settings
+            """)
+            
             List {
                 if let result = model.result {
-                    
-                    modelSummary(for: result)
-                    
                     ForEach(listItems(for: result)) { metric in
-                        ListItem(metric.title, value: metric.value, color: metric.color)
+                        ListItem(
+                            title: metric.title,
+                            value: metric.value,
+                            color: metric.color
+                        )
                     }
-
-                    
                 }
-                else { loading() }
-            }.unscrollableListStyle()
-        }.appTabStyle()
+                else { LoadingScreen() }
+
+            }.scrollableListStyle()
+            
+        }.smallPanelStyle()
     }
     
     // -------------------------
@@ -42,12 +57,11 @@ struct BatteryPowermetricsView: View {
                     .fixedSize(horizontal: false, vertical: true)
                 
                 Spacer()
-                Text("Confidence: \(result.confidence?.level ?? "") \(result.confidence?.reason ?? "")")
+                Text("(Confidence: \(result.confidence?.level ?? "") \(result.confidence?.reason ?? ""))")
                     .font(.system(size: 12))
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
         }
-        .padding(.vertical, 7)
         .padding(.horizontal, 10)
     }
     
@@ -76,6 +90,11 @@ struct BatteryPowermetricsView: View {
 }
 
 
+
+
+// ------------------------------------------
+//  ===== Battery Tab View in Stats tab =====
+//  -----------------------------------------
 struct BatteryTabView: View {
     @EnvironmentObject var battery: BatteryService
 
@@ -86,22 +105,33 @@ struct BatteryTabView: View {
             VStack(spacing: 5) {
                 List {
                     if let battInfo = battery.info {
-                        
-                        ForEach(chartableItems(for: battInfo)) { metric in
-                            chartMetrics.row(metric)
-                        }
-                        
                         ForEach(listItems(for: battInfo)) { metric in
+                            HeaderItem(
+                                title: metric.title,
+                                value: metric.value,
+                                color: metric.color
+                            )
+                        }
+                    }
+                    else { LoadingScreen() }
+                }
+                .unscrollableListStyle()
+                .frame(maxHeight: 110)
+                
+                
+                List {
+                    if let battInfo = battery.info {
+                        ForEach(chartableItems(for: battInfo)) { metric in
                             chartMetrics.row(metric)
                         }
 
                     }
-                    else {
-                        loading()
-                    }
-                }.scrollableListStyle()
+                }
+                .scrollableListStyle()
+                
+
             }
-            .appTabStyle()
+            .smallPanelStyle()
         }
     }
     
@@ -113,7 +143,10 @@ struct BatteryTabView: View {
             MetricRow(
                 title: "Battery Level",
                 value: "\(battInfo.batteryLevel)%",
-                color: batteryLevelColor(battInfo.batteryLevel),
+                color: batteryLevelColor(
+                    battInfo.batteryLevel,
+                    powerSrc: battInfo.powerSourceState
+                ),
                 chart: .batteryLevel,
                 visibilityKey: BatteryMenuKey.level
 
@@ -121,7 +154,7 @@ struct BatteryTabView: View {
             MetricRow(
                 title: "Battery Temperature",
                 value: String(format: "%.2f ℃", battInfo.temperature),
-                color: .primary,
+                color: batteryTemperatureColor(battInfo.temperature),
                 chart: .batteryTemperature,
                 visibilityKey: BatteryMenuKey.temperature
 
@@ -129,7 +162,10 @@ struct BatteryTabView: View {
             MetricRow(
                 title: battInfo.powerSourceState == "AC Power" ? "Time to Full" : "Time Remaining",
                 value: "\(battery.timeRemainingText)",
-                color: timeRemainingColor(Int(battInfo.timeRemaining), battInfo.powerSourceState),
+                color: timeRemainingColor(
+                    Int(battInfo.timeRemaining),
+                    battInfo.powerSourceState
+                ),
                 chart: .batteryTimeRemaining,
                 visibilityKey: BatteryMenuKey.timeRemaining
 
@@ -145,7 +181,7 @@ struct BatteryTabView: View {
             MetricRow(
                 title: "Max Capacity",
                 value: "\(battInfo.maxCapacity)%",
-                color: maxCapacityColor(battInfo.maxCapacity),
+                color: .primary,
                 visibilityKey: BatteryMenuKey.capacity
             ),
         
@@ -168,60 +204,51 @@ struct BatteryTabView: View {
     // -------------------------
     // ===== Text Coloring =====
     // -------------------------
-    private func batteryLevelColor(_ value: Int) -> Color {
-        switch value {
-        case 75...:   return .green
-        case 50..<75: return .yellow
-        case 25..<50: return .orange
-        default:      return .red
+    private func batteryLevelColor(_ percent: Int, powerSrc: String) -> Color {
+        // plugged in
+        if powerSrc == "AC Power" {
+            switch percent {
+            case 80...100: return .green
+            case 50..<80:  return .primary
+            case 20..<50:  return .yellow
+            default:       return .orange
+            }
+        }
+
+        // On battery
+        switch percent {
+        case 80...100: return .green
+        case 50..<80:  return .primary
+        case 30..<50:  return .yellow
+        case 15..<30:  return .orange
+        case 5..<15:   return .red
+        default:       return .purple
         }
     }
     
-    private func maxCapacityColor(_ value: Int) -> Color {
-        switch value {
-        case 90...:   return .green
-        case 85..<90: return .yellow
-        case 80..<85: return .orange
-        default:      return .red
+    private func batteryTemperatureColor(_ celsius: Double) -> Color {
+        switch celsius {
+        case ..<0:    return .blue
+        case 0..<10:  return .cyan
+        case 10..<30: return .green
+        case 30..<35: return .yellow
+        case 35..<40: return .orange
+        case 40..<45: return .red
+        default:      return .purple
         }
     }
     
-    private func timeRemainingColor(_ value: Int, _ powerSrc: String) -> Color {
-        if powerSrc == "AC Power" { return .primary }
+    private func timeRemainingColor(_ minutes: Int, _ powerSrc: String) -> Color {
+        guard powerSrc != "AC Power" else { return .primary }
+        guard minutes > 0 else { return .secondary }
 
-        switch value {
-        case 1000...:     return .green
-        case 500..<1000:  return .yellow
-        case 300..<500:   return .orange
-        case 0..<300:     return .red
-        default:          return .secondary
+        switch minutes {
+        case 360...:     return .green      // 6+ hours
+        case 180..<360:  return .primary    // 3–6 hours
+        case 90..<180:   return .yellow     // 1.5–3 hours
+        case 30..<90:    return .orange     // 30–90 min
+        case 10..<30:    return .red        // 10–30 min
+        default:         return .purple     // under 10 min
         }
     }
-}
-
-
-
-// -------------------------
-// ===== Menu Toggling =====
-// -------------------------
-struct BatteryMenuView: View {
-    var body: some View {
-        AppStorageToggle("Battery Level", key: BatteryMenuKey.level)
-        AppStorageToggle("Max Capacity", key: BatteryMenuKey.capacity)
-        AppStorageToggle("Time Remaining", key: BatteryMenuKey.timeRemaining)
-        AppStorageToggle("Power Source", key: BatteryMenuKey.powerSource)
-        AppStorageToggle("Battery Temperature", key: BatteryMenuKey.temperature)
-        AppStorageToggle("Low Power Mode", key: BatteryMenuKey.lowPowerMode)
-        AppStorageToggle("Charging Status", key: BatteryMenuKey.chargingStatus)
-    }
-}
-
-enum BatteryMenuKey {
-    static let level = "show_battery_level"
-    static let capacity = "show_battery_capacity"
-    static let timeRemaining = "show_time_remaining"
-    static let powerSource = "show_power_source"
-    static let temperature = "show_battery_temperature"
-    static let lowPowerMode = "show_low_power_mode"
-    static let chargingStatus = "show_charging_status"        
 }

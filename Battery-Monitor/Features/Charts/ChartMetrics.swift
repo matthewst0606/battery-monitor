@@ -66,15 +66,13 @@ struct MetricChart {
                     selectedChart: selectedChart,
                     chartPoints: chartPoints
                 )
-            } else {
-                HStack {
-                    Text(metric.title)
-                    Spacer()
-                    Text(metric.value)
-                        .font(.system(size: 12, weight: .bold))
-                        .foregroundStyle(metric.color)
-                }
-                .standardPadding()
+            }
+            else {
+                ListItem(
+                    title: metric.title,
+                    value: metric.value,
+                    color: metric.color
+                )
             }
         }
     }
@@ -98,13 +96,15 @@ struct ChartableMetricRow: View {
             HStack {
                 Text(title)
                 Spacer()
-                Text(value)
-                    .font(.system(size: 12, weight: .bold))
-                    .foregroundStyle(color)
+                Text(value).standard().foregroundStyle(color)
             }
             .standardPadding()
+
         }
         .buttonStyle(.accessoryBar)
+        .listRowSeparatorTint(.primary.opacity(0.2))
+        .listRowBackground(Color.clear)
+
 
         
         if selectedChart == chart { chartView }

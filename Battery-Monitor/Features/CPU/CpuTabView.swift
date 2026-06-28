@@ -6,7 +6,9 @@
 import SwiftUI
 import Combine
 
-
+// ------------------------------------------------------
+//  ===== CPU Powermetrics View in Powermetrics tab =====
+//  -----------------------------------------------------
 struct CPUPowermetricsView: View {
     @EnvironmentObject var cpu: CPUService
     @EnvironmentObject var model: ModelService
@@ -18,17 +20,17 @@ struct CPUPowermetricsView: View {
                 if let result = model.result {
                     ForEach(listItems(for: result)) { metric in
                         ListItem(
-                            metric.title,
+                            title: metric.title,
                             value: metric.value,
                             color: metric.color
                         )
                     }
                 }
-                else { loading() }
+                else { LoadingScreen() }
             }
             .unscrollableListStyle()
         }
-        .appTabStyle()
+        .smallPanelStyle()
     }
     
     // -------------------------
@@ -65,7 +67,9 @@ struct CPUPowermetricsView: View {
     }
 }
 
-
+// --------------------------------------
+//  ===== CPU Tab View in Stats tab =====
+//  -------------------------------------
 struct CPUTabView: View {
     @EnvironmentObject var cpu: CPUService
     
@@ -80,11 +84,11 @@ struct CPUTabView: View {
                             chartMetrics.row(metric)
                         }
                     }
-                    else { loading() }
+                    else { LoadingScreen() }
                 }
                 .scrollableListStyle()
             }
-            .appTabStyle()
+            .smallPanelStyle()
         }
     }
     
@@ -147,24 +151,4 @@ struct CPUTabView: View {
     }
     
     
-}
-
-// -------------------------
-// ===== Menu Toggling =====
-// -------------------------
-struct CPUMenuView: View {
-    var body: some View {
-        AppStorageToggle("CPU Usage", key: CPUMenuKey.total)
-        AppStorageToggle("User Usage", key: CPUMenuKey.user)
-        AppStorageToggle("System Usage", key: CPUMenuKey.system)
-        AppStorageToggle("System Idle", key: CPUMenuKey.idle)
-    }
-}
-
-enum CPUMenuKey {
-    static let total = "cpu_usage"
-    static let user = "user_usage"
-    static let system = "system_usage"
-    static let idle = "idle_usage"
-
 }
